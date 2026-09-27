@@ -8,9 +8,11 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
         pluginManager.apply("investimento.android.library")
         pluginManager.apply("investimento.android.compose")
         pluginManager.apply("investimento.hilt")
+        // Rotas de navegação tipadas (@Serializable).
+        pluginManager.apply("org.jetbrains.kotlin.plugin.serialization")
         dependencies {
-            add("implementation", project(":core:designsystem"))
-            add("implementation", project(":core:domain"))
+            add("implementation", project(":core:ui"))
+            add("implementation", project(":core:common"))
             add("implementation", libs.lib("androidx-lifecycle-runtime-compose"))
             add("implementation", libs.lib("androidx-lifecycle-viewmodel-compose"))
             add("implementation", libs.lib("androidx-hilt-navigation-compose"))

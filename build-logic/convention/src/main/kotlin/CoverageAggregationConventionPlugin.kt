@@ -15,6 +15,15 @@ class CoverageAggregationConventionPlugin : Plugin<Project> {
 
         extensions.configure<KoverProjectExtension> {
             reports {
+                filters {
+                    excludes {
+                        // Código gerado por Hilt, Room e Compose: não é nosso para testar.
+                        packages("hilt_aggregated_deps", "dagger.hilt.internal.aggregatedroot.codegen")
+                        classes("*_Factory", "*_Factory\$*", "*_HiltModules*", "Hilt_*", "*_MembersInjector", "*_Impl", "*_Impl\$*")
+                        classes("*ComposableSingletons*", "*.BuildConfig")
+                        annotatedBy("dagger.Module")
+                    }
+                }
                 verify {
                     rule {
                         minBound(MIN_LINE_COVERAGE)

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!--
+        BouncyCastle chega de carona no PdfBox-Android (usado só para abrir PDFs criptografados).
+        O app não usa esse código para rede, e o network_security_config só permite HTTPS.
+        O aviso fica ignorado apenas dentro desse jar.
+    -->
+    <issue id="TrustAllX509TrustManager">
+        <ignore path="**/bcpkix-*.jar" />
+    </issue>
+</lint>

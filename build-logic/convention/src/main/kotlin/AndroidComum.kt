@@ -28,9 +28,10 @@ internal fun Project.configurarAndroid(android: CommonExtension<*, *, *, *, *, *
             isReturnDefaultValues = false
         }
         lint {
-            warningsAsErrors = false
+            warningsAsErrors = true
             abortOnError = true
             checkDependencies = true
+            lintConfig = rootProject.file("config/lint/lint.xml")
         }
     }
     extensions.configure<KotlinAndroidProjectExtension> {

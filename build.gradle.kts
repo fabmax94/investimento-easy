@@ -7,5 +7,13 @@ plugins {
 dependencies {
     kover(projects.core.model)
     kover(projects.core.domain)
+    kover(projects.core.importacao)
     kover(projects.parser.xperformance)
+    kover(projects.core.database)
+    kover(projects.core.documentos)
+    kover(projects.core.designsystem)
+    kover(projects.core.ui)
+    kover(projects.feature.upload)
+    kover(projects.feature.portfolio)
+    kover(projects.app)
 }

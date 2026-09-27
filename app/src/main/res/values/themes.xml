@@ -1,0 +1,8 @@
+<resources>
+    <!-- Só a janela: o conteúdo é todo Compose com o tema Castanha. -->
+    <style name="Theme.InvestimentoEasy" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/fundo</item>
+    </style>
+    <color name="fundo">#FCFCFC</color>
+    <color name="destaque">#E80537</color>
+</resources>
