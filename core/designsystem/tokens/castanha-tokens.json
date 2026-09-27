@@ -1,0 +1,1451 @@
+{
+  "version": 1,
+  "color": {
+    "themes": [
+      {
+        "id": "light",
+        "name": "Light"
+      },
+      {
+        "id": "root-dark",
+        "name": "Root Dark"
+      },
+      {
+        "id": "root-dark-2",
+        "name": "Root Dark"
+      }
+    ],
+    "tokens": [
+      {
+        "name": "castanha-elevations-level-1-color",
+        "value": {
+          "light": "rgba(0, 0, 0, 0.08)",
+          "root-dark": "rgba(255, 255, 255, 0.08)",
+          "root-dark-2": "rgba(255, 255, 255, 0.08)"
+        }
+      },
+      {
+        "name": "castanha-elevations-level-2-color",
+        "value": {
+          "light": "rgba(0, 0, 0, 0.16)",
+          "root-dark": "rgba(255, 255, 255, 0.16)",
+          "root-dark-2": "rgba(255, 255, 255, 0.16)"
+        }
+      },
+      {
+        "name": "castanha-elevations-level-3-color",
+        "value": {
+          "light": "rgba(0, 0, 0, 0.16)",
+          "root-dark": "rgba(255, 255, 255, 0.16)",
+          "root-dark-2": "rgba(255, 255, 255, 0.16)"
+        }
+      },
+      {
+        "name": "castanha-colors-surface-default",
+        "value": {
+          "light": "#fcfcfc",
+          "root-dark": "#1a1a1a",
+          "root-dark-2": "#1a1a1a"
+        }
+      },
+      {
+        "name": "castanha-colors-surface-01",
+        "value": {
+          "light": "#f0f0f0",
+          "root-dark": "#4d4d4d",
+          "root-dark-2": "#4d4d4d"
+        }
+      },
+      {
+        "name": "castanha-colors-surface-02",
+        "value": {
+          "light": "#999999",
+          "root-dark": "#808080",
+          "root-dark-2": "#808080"
+        }
+      },
+      {
+        "name": "castanha-colors-surface-inversed",
+        "value": {
+          "light": "#1a1a1a",
+          "root-dark": "#fcfcfc",
+          "root-dark-2": "#fcfcfc"
+        }
+      },
+      {
+        "name": "castanha-colors-surface-accent",
+        "value": {
+          "light": "#e80537",
+          "root-dark": "#e80537",
+          "root-dark-2": "#e80537"
+        }
+      },
+      {
+        "name": "castanha-colors-text-soft",
+        "value": {
+          "light": "#999999",
+          "root-dark": "#808080",
+          "root-dark-2": "#808080"
+        }
+      },
+      {
+        "name": "castanha-colors-text-medium",
+        "value": {
+          "light": "#4d4d4d",
+          "root-dark": "#cccccc",
+          "root-dark-2": "#cccccc"
+        }
+      },
+      {
+        "name": "castanha-colors-text-intense",
+        "value": {
+          "light": "#1a1a1a",
+          "root-dark": "#fcfcfc",
+          "root-dark-2": "#fcfcfc"
+        }
+      },
+      {
+        "name": "castanha-colors-text-accent",
+        "value": {
+          "light": "#e80537",
+          "root-dark": "#e80537",
+          "root-dark-2": "#e80537"
+        }
+      },
+      {
+        "name": "castanha-colors-text-inversed",
+        "value": {
+          "light": "#fcfcfc",
+          "root-dark": "#1a1a1a",
+          "root-dark-2": "#1a1a1a"
+        }
+      },
+      {
+        "name": "castanha-colors-border-soft",
+        "value": {
+          "light": "#fcfcfc",
+          "root-dark": "#1a1a1a",
+          "root-dark-2": "#1a1a1a"
+        }
+      },
+      {
+        "name": "castanha-colors-border-medium",
+        "value": {
+          "light": "#999999",
+          "root-dark": "#808080",
+          "root-dark-2": "#808080"
+        }
+      },
+      {
+        "name": "castanha-colors-border-semi-intense",
+        "value": {
+          "light": "#4d4d4d",
+          "root-dark": "#cccccc",
+          "root-dark-2": "#cccccc"
+        }
+      },
+      {
+        "name": "castanha-colors-border-semi-soft",
+        "value": {
+          "light": "#e3e3e3",
+          "root-dark": "#4d4d4d",
+          "root-dark-2": "#4d4d4d"
+        }
+      },
+      {
+        "name": "castanha-colors-border-intense",
+        "value": {
+          "light": "#1a1a1a",
+          "root-dark": "#fcfcfc",
+          "root-dark-2": "#fcfcfc"
+        }
+      },
+      {
+        "name": "castanha-colors-icons-soft",
+        "value": {
+          "light": "#999999",
+          "root-dark": "#808080",
+          "root-dark-2": "#808080"
+        }
+      },
+      {
+        "name": "castanha-colors-icons-medium",
+        "value": {
+          "light": "#4d4d4d",
+          "root-dark": "#cccccc",
+          "root-dark-2": "#cccccc"
+        }
+      },
+      {
+        "name": "castanha-colors-icons-intense",
+        "value": {
+          "light": "#1a1a1a",
+          "root-dark": "#fcfcfc",
+          "root-dark-2": "#fcfcfc"
+        }
+      },
+      {
+        "name": "castanha-colors-icons-accent",
+        "value": {
+          "light": "#e80537",
+          "root-dark": "#e80537",
+          "root-dark-2": "#e80537"
+        }
+      },
+      {
+        "name": "castanha-colors-icons-inversed",
+        "value": {
+          "light": "#fcfcfc",
+          "root-dark": "#1a1a1a",
+          "root-dark-2": "#1a1a1a"
+        }
+      },
+      {
+        "name": "castanha-colors-accent-solid-soft",
+        "value": {
+          "light": "#fef0f1",
+          "root-dark": "#2c070a",
+          "root-dark-2": "#2c070a"
+        }
+      },
+      {
+        "name": "castanha-colors-accent-solid-semi-soft",
+        "value": {
+          "light": "#feabb0",
+          "root-dark": "#9e0222",
+          "root-dark-2": "#9e0222"
+        }
+      },
+      {
+        "name": "castanha-colors-accent-solid-medium",
+        "value": {
+          "light": "#e80537",
+          "root-dark": "#e80537",
+          "root-dark-2": "#e80537"
+        }
+      },
+      {
+        "name": "castanha-colors-accent-solid-semi-intense",
+        "value": {
+          "light": "#9e0222",
+          "root-dark": "#fe959b",
+          "root-dark-2": "#fe959b"
+        }
+      },
+      {
+        "name": "castanha-colors-accent-solid-intense",
+        "value": {
+          "light": "#2c070a",
+          "root-dark": "#fec5c8",
+          "root-dark-2": "#fec5c8"
+        }
+      },
+      {
+        "name": "castanha-colors-accent-opacity-semi-transparent",
+        "value": {
+          "light": "rgba(232, 5, 55, 0.16)",
+          "root-dark": "rgba(232, 5, 55, 0.16)",
+          "root-dark-2": "rgba(232, 5, 55, 0.16)"
+        }
+      },
+      {
+        "name": "castanha-colors-accent-opacity-light",
+        "value": {
+          "light": "rgba(232, 5, 55, 0.32)",
+          "root-dark": "rgba(232, 5, 55, 0.32)",
+          "root-dark-2": "rgba(232, 5, 55, 0.32)"
+        }
+      },
+      {
+        "name": "castanha-colors-accent-opacity-medium",
+        "value": {
+          "light": "rgba(232, 5, 55, 0.4)",
+          "root-dark": "rgba(232, 5, 55, 0.4)",
+          "root-dark-2": "rgba(232, 5, 55, 0.4)"
+        }
+      },
+      {
+        "name": "castanha-colors-accent-opacity-intense",
+        "value": {
+          "light": "rgba(232, 5, 55, 0.64)",
+          "root-dark": "rgba(232, 5, 55, 0.64)",
+          "root-dark-2": "rgba(232, 5, 55, 0.64)"
+        }
+      },
+      {
+        "name": "castanha-colors-accent-opacity-semi-opaque",
+        "value": {
+          "light": "rgba(232, 5, 55, 0.8)",
+          "root-dark": "rgba(232, 5, 55, 0.8)",
+          "root-dark-2": "rgba(232, 5, 55, 0.8)"
+        }
+      },
+      {
+        "name": "castanha-colors-feedback-negative-soft",
+        "value": {
+          "light": "#f5d6e8",
+          "root-dark": "#521438",
+          "root-dark-2": "#521438"
+        }
+      },
+      {
+        "name": "castanha-colors-feedback-negative-intense",
+        "value": {
+          "light": "#521438",
+          "root-dark": "#f5d6e8",
+          "root-dark-2": "#f5d6e8"
+        }
+      },
+      {
+        "name": "castanha-colors-feedback-negative-semi-soft",
+        "value": {
+          "light": "#ebadd1",
+          "root-dark": "#7b1e54",
+          "root-dark-2": "#7b1e54"
+        }
+      },
+      {
+        "name": "castanha-colors-feedback-negative-medium",
+        "value": {
+          "light": "#cd328c",
+          "root-dark": "#cd328c",
+          "root-dark-2": "#cd328c"
+        }
+      },
+      {
+        "name": "castanha-colors-feedback-negative-semi-intense",
+        "value": {
+          "light": "#7b1e54",
+          "root-dark": "#e184ba",
+          "root-dark-2": "#e184ba"
+        }
+      },
+      {
+        "name": "castanha-colors-feedback-positive-soft",
+        "value": {
+          "light": "#d7f4d7",
+          "root-dark": "#155115",
+          "root-dark-2": "#155115"
+        }
+      },
+      {
+        "name": "castanha-colors-feedback-positive-intense",
+        "value": {
+          "light": "#155115",
+          "root-dark": "#d7f4d7",
+          "root-dark-2": "#d7f4d7"
+        }
+      },
+      {
+        "name": "castanha-colors-feedback-positive-semi-soft",
+        "value": {
+          "light": "#aeeaae",
+          "root-dark": "#207920",
+          "root-dark-2": "#207920"
+        }
+      },
+      {
+        "name": "castanha-colors-feedback-positive-medium",
+        "value": {
+          "light": "#35ca35",
+          "root-dark": "#35ca35",
+          "root-dark-2": "#35ca35"
+        }
+      },
+      {
+        "name": "castanha-colors-feedback-positive-semi-intense",
+        "value": {
+          "light": "#207920",
+          "root-dark": "#86df86",
+          "root-dark-2": "#86df86"
+        }
+      },
+      {
+        "name": "castanha-colors-feedback-warning-soft",
+        "value": {
+          "light": "#fff1cc",
+          "root-dark": "#332500",
+          "root-dark-2": "#332500"
+        }
+      },
+      {
+        "name": "castanha-colors-feedback-warning-intense",
+        "value": {
+          "light": "#652f01",
+          "root-dark": "#fee3cd",
+          "root-dark-2": "#fee3cd"
+        }
+      },
+      {
+        "name": "castanha-colors-feedback-warning-semi-soft",
+        "value": {
+          "light": "#ffe399",
+          "root-dark": "#997000",
+          "root-dark-2": "#997000"
+        }
+      },
+      {
+        "name": "castanha-colors-feedback-warning-medium",
+        "value": {
+          "light": "#ffba00",
+          "root-dark": "#ffba00",
+          "root-dark-2": "#ffba00"
+        }
+      },
+      {
+        "name": "castanha-colors-feedback-warning-semi-intense",
+        "value": {
+          "light": "#974602",
+          "root-dark": "#fdac68",
+          "root-dark-2": "#fdac68"
+        }
+      },
+      {
+        "name": "castanha-colors-feedback-informative-soft",
+        "value": {
+          "light": "#cce6ff",
+          "root-dark": "#003566",
+          "root-dark-2": "#003566"
+        }
+      },
+      {
+        "name": "castanha-colors-feedback-informative-intense",
+        "value": {
+          "light": "#003566",
+          "root-dark": "#cce6ff",
+          "root-dark-2": "#cce6ff"
+        }
+      },
+      {
+        "name": "castanha-colors-feedback-informative-semi-soft",
+        "value": {
+          "light": "#99ceff",
+          "root-dark": "#004f99",
+          "root-dark-2": "#004f99"
+        }
+      },
+      {
+        "name": "castanha-colors-feedback-informative-medium",
+        "value": {
+          "light": "#0084ff",
+          "root-dark": "#0084ff",
+          "root-dark-2": "#0084ff"
+        }
+      },
+      {
+        "name": "castanha-colors-feedback-informative-semi-intense",
+        "value": {
+          "light": "#004f99",
+          "root-dark": "#66b5ff",
+          "root-dark-2": "#66b5ff"
+        }
+      },
+      {
+        "name": "castanha-colors-neutral-solid-soft",
+        "value": {
+          "light": "#fcfcfc",
+          "root-dark": "#1a1a1a",
+          "root-dark-2": "#1a1a1a"
+        }
+      },
+      {
+        "name": "castanha-colors-neutral-solid-semi-soft",
+        "value": {
+          "light": "#e3e3e3",
+          "root-dark": "#4d4d4d",
+          "root-dark-2": "#4d4d4d"
+        }
+      },
+      {
+        "name": "castanha-colors-neutral-solid-medium",
+        "value": {
+          "light": "#999999",
+          "root-dark": "#808080",
+          "root-dark-2": "#808080"
+        }
+      },
+      {
+        "name": "castanha-colors-neutral-solid-semi-intense",
+        "value": {
+          "light": "#4d4d4d",
+          "root-dark": "#cccccc",
+          "root-dark-2": "#cccccc"
+        }
+      },
+      {
+        "name": "castanha-colors-neutral-solid-intense",
+        "value": {
+          "light": "#1a1a1a",
+          "root-dark": "#fcfcfc",
+          "root-dark-2": "#fcfcfc"
+        }
+      },
+      {
+        "name": "castanha-colors-neutral-opacity-soft-semi-transparent",
+        "value": {
+          "light": "rgba(252, 252, 252, 0.16)",
+          "root-dark": "rgba(26, 26, 26, 0.16)",
+          "root-dark-2": "rgba(26, 26, 26, 0.16)"
+        }
+      },
+      {
+        "name": "castanha-colors-neutral-opacity-soft-light",
+        "value": {
+          "light": "rgba(252, 252, 252, 0.32)",
+          "root-dark": "rgba(26, 26, 26, 0.32)",
+          "root-dark-2": "rgba(26, 26, 26, 0.32)"
+        }
+      },
+      {
+        "name": "castanha-colors-neutral-opacity-soft-medium",
+        "value": {
+          "light": "rgba(252, 252, 252, 0.4)",
+          "root-dark": "rgba(26, 26, 26, 0.4)",
+          "root-dark-2": "rgba(26, 26, 26, 0.4)"
+        }
+      },
+      {
+        "name": "castanha-colors-neutral-opacity-soft-intense",
+        "value": {
+          "light": "rgba(252, 252, 252, 0.64)",
+          "root-dark": "rgba(26, 26, 26, 0.64)",
+          "root-dark-2": "rgba(26, 26, 26, 0.64)"
+        }
+      },
+      {
+        "name": "castanha-colors-neutral-opacity-soft-semi-opaque",
+        "value": {
+          "light": "rgba(252, 252, 252, 0.8)",
+          "root-dark": "rgba(26, 26, 26, 0.8)",
+          "root-dark-2": "rgba(26, 26, 26, 0.8)"
+        }
+      },
+      {
+        "name": "castanha-colors-neutral-opacity-intense-semi-transparent",
+        "value": {
+          "light": "rgba(26, 26, 26, 0.16)",
+          "root-dark": "rgba(252, 252, 252, 0.16)",
+          "root-dark-2": "rgba(252, 252, 252, 0.16)"
+        }
+      },
+      {
+        "name": "castanha-colors-neutral-opacity-intense-light",
+        "value": {
+          "light": "rgba(26, 26, 26, 0.32)",
+          "root-dark": "rgba(252, 252, 252, 0.32)",
+          "root-dark-2": "rgba(252, 252, 252, 0.32)"
+        }
+      },
+      {
+        "name": "castanha-colors-neutral-opacity-intense-medium",
+        "value": {
+          "light": "rgba(26, 26, 26, 0.4)",
+          "root-dark": "rgba(252, 252, 252, 0.4)",
+          "root-dark-2": "rgba(252, 252, 252, 0.4)"
+        }
+      },
+      {
+        "name": "castanha-colors-neutral-opacity-intense-intense",
+        "value": {
+          "light": "rgba(26, 26, 26, 0.64)",
+          "root-dark": "rgba(252, 252, 252, 0.64)",
+          "root-dark-2": "rgba(252, 252, 252, 0.64)"
+        }
+      },
+      {
+        "name": "castanha-colors-neutral-opacity-intense-semi-opaque",
+        "value": {
+          "light": "rgba(26, 26, 26, 0.8)",
+          "root-dark": "rgba(252, 252, 252, 0.8)",
+          "root-dark-2": "rgba(252, 252, 252, 0.8)"
+        }
+      },
+      {
+        "name": "castanha-colors-support-system",
+        "value": {
+          "light": "#0069cc",
+          "root-dark": "#0069cc",
+          "root-dark-2": "#0069cc"
+        }
+      },
+      {
+        "name": "castanha-colors-support-lighter",
+        "value": {
+          "light": "#fcfcfc",
+          "root-dark": "#fcfcfc",
+          "root-dark-2": "#fcfcfc"
+        }
+      },
+      {
+        "name": "castanha-colors-support-accent-soft",
+        "value": {
+          "light": "#f8d3d6",
+          "root-dark": "#f8d3d6",
+          "root-dark-2": "#f8d3d6"
+        }
+      },
+      {
+        "name": "castanha-colors-support-darker",
+        "value": {
+          "light": "#1a1a1a",
+          "root-dark": "#1a1a1a",
+          "root-dark-2": "#1a1a1a"
+        }
+      },
+      {
+        "name": "castanha-colors-decorative-01",
+        "value": {
+          "light": "#ffba00",
+          "root-dark": "#ffba00",
+          "root-dark-2": "#ffba00"
+        }
+      },
+      {
+        "name": "castanha-colors-decorative-02",
+        "value": {
+          "light": "#fb7504",
+          "root-dark": "#fb7504",
+          "root-dark-2": "#fb7504"
+        }
+      },
+      {
+        "name": "castanha-colors-decorative-04",
+        "value": {
+          "light": "#9230cf",
+          "root-dark": "#9230cf",
+          "root-dark-2": "#9230cf"
+        }
+      },
+      {
+        "name": "castanha-colors-decorative-03",
+        "value": {
+          "light": "#35ca35",
+          "root-dark": "#35ca35",
+          "root-dark-2": "#35ca35"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-01-soft",
+        "value": {
+          "light": "#fff1cc",
+          "root-dark": "#ffba00",
+          "root-dark-2": "#ffba00"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-01-semi-soft",
+        "value": {
+          "light": "#ffe399",
+          "root-dark": "#ffc833",
+          "root-dark-2": "#ffc833"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-01-medium",
+        "value": {
+          "light": "#ffc833",
+          "root-dark": "#ffe399",
+          "root-dark-2": "#ffe399"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-01-semi-intense",
+        "value": {
+          "light": "#ffba00",
+          "root-dark": "#fff1cc",
+          "root-dark-2": "#fff1cc"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-01-intense",
+        "value": {
+          "light": "#cc9500",
+          "root-dark": "#fff8e5",
+          "root-dark-2": "#fff8e5"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-01-pale",
+        "value": {
+          "light": "#fff8e5",
+          "root-dark": "#cc9500",
+          "root-dark-2": "#cc9500"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-01-mild",
+        "value": {
+          "light": "#ffd666",
+          "root-dark": "#ffd666",
+          "root-dark-2": "#ffd666"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-02-pale",
+        "value": {
+          "light": "#ebfaeb",
+          "root-dark": "#207920",
+          "root-dark-2": "#207920"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-02-soft",
+        "value": {
+          "light": "#d7f4d7",
+          "root-dark": "#35ca35",
+          "root-dark-2": "#35ca35"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-02-semi-soft",
+        "value": {
+          "light": "#aeeaae",
+          "root-dark": "#5ed45e",
+          "root-dark-2": "#5ed45e"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-02-mild",
+        "value": {
+          "light": "#86df86",
+          "root-dark": "#86df86",
+          "root-dark-2": "#86df86"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-02-medium",
+        "value": {
+          "light": "#5ed45e",
+          "root-dark": "#aeeaae",
+          "root-dark-2": "#aeeaae"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-02-semi-intense",
+        "value": {
+          "light": "#35ca35",
+          "root-dark": "#d7f4d7",
+          "root-dark-2": "#d7f4d7"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-02-intense",
+        "value": {
+          "light": "#207920",
+          "root-dark": "#ebfaeb",
+          "root-dark-2": "#ebfaeb"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-03-pale",
+        "value": {
+          "light": "#e5f3ff",
+          "root-dark": "#004f99",
+          "root-dark-2": "#004f99"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-03-soft",
+        "value": {
+          "light": "#cce6ff",
+          "root-dark": "#0084ff",
+          "root-dark-2": "#0084ff"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-03-semi-soft",
+        "value": {
+          "light": "#99ceff",
+          "root-dark": "#339cff",
+          "root-dark-2": "#339cff"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-03-mild",
+        "value": {
+          "light": "#66b5ff",
+          "root-dark": "#66b5ff",
+          "root-dark-2": "#66b5ff"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-03-medium",
+        "value": {
+          "light": "#339cff",
+          "root-dark": "#99ceff",
+          "root-dark-2": "#99ceff"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-03-semi-intense",
+        "value": {
+          "light": "#0084ff",
+          "root-dark": "#cce6ff",
+          "root-dark-2": "#cce6ff"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-03-intense",
+        "value": {
+          "light": "#004f99",
+          "root-dark": "#e5f3ff",
+          "root-dark-2": "#e5f3ff"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-04-soft",
+        "value": {
+          "light": "#d4acec",
+          "root-dark": "#581d7c",
+          "root-dark-2": "#581d7c"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-04-semi-soft",
+        "value": {
+          "light": "#be83e2",
+          "root-dark": "#9230cf",
+          "root-dark-2": "#9230cf"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-04-medium",
+        "value": {
+          "light": "#9230cf",
+          "root-dark": "#be83e2",
+          "root-dark-2": "#be83e2"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-04-intense",
+        "value": {
+          "light": "#581d7c",
+          "root-dark": "#d4acec",
+          "root-dark-2": "#d4acec"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-05-soft",
+        "value": {
+          "light": "#73d4d5",
+          "root-dark": "#1f5f66",
+          "root-dark-2": "#1f5f66"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-05-semi-soft",
+        "value": {
+          "light": "#46b6bb",
+          "root-dark": "#22777f",
+          "root-dark-2": "#22777f"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-05-medium",
+        "value": {
+          "light": "#22777f",
+          "root-dark": "#46b6bb",
+          "root-dark-2": "#46b6bb"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-05-intense",
+        "value": {
+          "light": "#1f5f66",
+          "root-dark": "#73d4d5",
+          "root-dark-2": "#73d4d5"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-06-soft",
+        "value": {
+          "light": "#ebadd1",
+          "root-dark": "#a42870",
+          "root-dark-2": "#a42870"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-06-semi-soft",
+        "value": {
+          "light": "#e184ba",
+          "root-dark": "#d75ba3",
+          "root-dark-2": "#d75ba3"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-06-medium",
+        "value": {
+          "light": "#d75ba3",
+          "root-dark": "#e184ba",
+          "root-dark-2": "#e184ba"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-06-intense",
+        "value": {
+          "light": "#a42870",
+          "root-dark": "#ebadd1",
+          "root-dark-2": "#ebadd1"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-07-soft",
+        "value": {
+          "light": "#e3e3e3",
+          "root-dark": "#727272",
+          "root-dark-2": "#727272"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-07-semi-soft",
+        "value": {
+          "light": "#d3d3d3",
+          "root-dark": "#a3a3a3",
+          "root-dark-2": "#a3a3a3"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-07-medium",
+        "value": {
+          "light": "#a3a3a3",
+          "root-dark": "#d3d3d3",
+          "root-dark-2": "#d3d3d3"
+        }
+      },
+      {
+        "name": "castanha-colors-charts-07-intense",
+        "value": {
+          "light": "#727272",
+          "root-dark": "#e3e3e3",
+          "root-dark-2": "#e3e3e3"
+        }
+      }
+    ]
+  },
+  "type": {
+    "fonts": [
+      {
+        "family": "Roboto",
+        "file": "fonts/roboto-400-italic-latin-ext.woff2",
+        "weight": "400",
+        "style": "italic"
+      },
+      {
+        "family": "Roboto",
+        "file": "fonts/roboto-400-italic-latin.woff2",
+        "weight": "400",
+        "style": "italic"
+      },
+      {
+        "family": "Roboto",
+        "file": "fonts/roboto-500-italic-latin-ext.woff2",
+        "weight": "500",
+        "style": "italic"
+      },
+      {
+        "family": "Roboto",
+        "file": "fonts/roboto-500-italic-latin.woff2",
+        "weight": "500",
+        "style": "italic"
+      },
+      {
+        "family": "Roboto",
+        "file": "fonts/roboto-700-italic-latin-ext.woff2",
+        "weight": "700",
+        "style": "italic"
+      },
+      {
+        "family": "Roboto",
+        "file": "fonts/roboto-700-italic-latin.woff2",
+        "weight": "700",
+        "style": "italic"
+      },
+      {
+        "family": "Roboto",
+        "file": "fonts/roboto-400-normal-latin-ext.woff2",
+        "weight": "400",
+        "style": "normal"
+      },
+      {
+        "family": "Roboto",
+        "file": "fonts/roboto-400-normal-latin.woff2",
+        "weight": "400",
+        "style": "normal"
+      },
+      {
+        "family": "Roboto",
+        "file": "fonts/roboto-500-normal-latin-ext.woff2",
+        "weight": "500",
+        "style": "normal"
+      },
+      {
+        "family": "Roboto",
+        "file": "fonts/roboto-500-normal-latin.woff2",
+        "weight": "500",
+        "style": "normal"
+      },
+      {
+        "family": "Roboto",
+        "file": "fonts/roboto-700-normal-latin-ext.woff2",
+        "weight": "700",
+        "style": "normal"
+      },
+      {
+        "family": "Roboto",
+        "file": "fonts/roboto-700-normal-latin.woff2",
+        "weight": "700",
+        "style": "normal"
+      },
+      {
+        "family": "Work Sans",
+        "file": "fonts/worksans-700-normal-latin-ext.woff2",
+        "weight": "700",
+        "style": "normal"
+      },
+      {
+        "family": "Work Sans",
+        "file": "fonts/worksans-700-normal-latin.woff2",
+        "weight": "700",
+        "style": "normal"
+      }
+    ],
+    "families": {
+      "castanha-font-family-default": "Roboto",
+      "castanha-font-family-decorative": "Work Sans",
+      "castanha-font-family-fallback": "Arial"
+    },
+    "groups": []
+  },
+  "spacing": {
+    "tokens": [
+      {
+        "name": "castanha-elevations-level-1-blur",
+        "value": "8px"
+      },
+      {
+        "name": "castanha-elevations-level-1-spread",
+        "value": "0px"
+      },
+      {
+        "name": "castanha-elevations-level-1-x",
+        "value": "0px"
+      },
+      {
+        "name": "castanha-elevations-level-1-y",
+        "value": "4px"
+      },
+      {
+        "name": "castanha-elevations-level-2-blur",
+        "value": "24px"
+      },
+      {
+        "name": "castanha-elevations-level-2-spread",
+        "value": "0px"
+      },
+      {
+        "name": "castanha-elevations-level-2-x",
+        "value": "0px"
+      },
+      {
+        "name": "castanha-elevations-level-2-y",
+        "value": "8px"
+      },
+      {
+        "name": "castanha-elevations-level-3-blur",
+        "value": "32px"
+      },
+      {
+        "name": "castanha-elevations-level-3-spread",
+        "value": "0px"
+      },
+      {
+        "name": "castanha-elevations-level-3-x",
+        "value": "0px"
+      },
+      {
+        "name": "castanha-elevations-level-3-y",
+        "value": "16px"
+      },
+      {
+        "name": "castanha-sizes-0",
+        "value": "0px"
+      },
+      {
+        "name": "castanha-sizes-1",
+        "value": "1px"
+      },
+      {
+        "name": "castanha-sizes-2",
+        "value": "2px"
+      },
+      {
+        "name": "castanha-sizes-4",
+        "value": "4px"
+      },
+      {
+        "name": "castanha-sizes-6",
+        "value": "6px"
+      },
+      {
+        "name": "castanha-sizes-8",
+        "value": "8px"
+      },
+      {
+        "name": "castanha-sizes-12",
+        "value": "12px"
+      },
+      {
+        "name": "castanha-sizes-14",
+        "value": "14px"
+      },
+      {
+        "name": "castanha-sizes-16",
+        "value": "16px"
+      },
+      {
+        "name": "castanha-sizes-20",
+        "value": "20px"
+      },
+      {
+        "name": "castanha-sizes-24",
+        "value": "24px"
+      },
+      {
+        "name": "castanha-sizes-28",
+        "value": "28px"
+      },
+      {
+        "name": "castanha-sizes-32",
+        "value": "32px"
+      },
+      {
+        "name": "castanha-sizes-40",
+        "value": "40px"
+      },
+      {
+        "name": "castanha-sizes-44",
+        "value": "44px"
+      },
+      {
+        "name": "castanha-sizes-48",
+        "value": "48px"
+      },
+      {
+        "name": "castanha-sizes-56",
+        "value": "56px"
+      },
+      {
+        "name": "castanha-sizes-64",
+        "value": "64px"
+      },
+      {
+        "name": "castanha-sizes-72",
+        "value": "72px"
+      },
+      {
+        "name": "castanha-sizes-80",
+        "value": "80px"
+      },
+      {
+        "name": "castanha-sizes-88",
+        "value": "88px"
+      },
+      {
+        "name": "castanha-sizes-92",
+        "value": "92px"
+      },
+      {
+        "name": "castanha-sizes-104",
+        "value": "104px"
+      },
+      {
+        "name": "castanha-sizes-120",
+        "value": "120px"
+      },
+      {
+        "name": "castanha-sizes-160",
+        "value": "160px"
+      },
+      {
+        "name": "castanha-sizes-200",
+        "value": "200px"
+      },
+      {
+        "name": "castanha-border-width-hairline",
+        "value": "1px"
+      },
+      {
+        "name": "castanha-border-width-heavy",
+        "value": "8px"
+      },
+      {
+        "name": "castanha-border-width-none",
+        "value": "0px"
+      },
+      {
+        "name": "castanha-border-width-thick",
+        "value": "4px"
+      },
+      {
+        "name": "castanha-border-width-thin",
+        "value": "2px"
+      },
+      {
+        "name": "castanha-buttons-main-button-width-min-width",
+        "value": "136px"
+      },
+      {
+        "name": "castanha-lists-content-list-item-max-width",
+        "value": "3000px"
+      },
+      {
+        "name": "castanha-lists-selection-list-item-max-width",
+        "value": "3000px"
+      },
+      {
+        "name": "castanha-selection-controls-filter-chips-height",
+        "value": "40px"
+      },
+      {
+        "name": "castanha-selection-controls-input-chips-height",
+        "value": "40px"
+      },
+      {
+        "name": "castanha-grids-margin",
+        "value": "104px"
+      },
+      {
+        "name": "castanha-grids-gutter",
+        "value": "20px"
+      },
+      {
+        "name": "castanha-side-menu-width",
+        "value": "360px"
+      },
+      {
+        "name": "grid-gutter",
+        "value": "20px"
+      },
+      {
+        "name": "grid-margin",
+        "value": "104px"
+      }
+    ]
+  },
+  "radius": {
+    "tokens": [
+      {
+        "name": "castanha-border-radius-big",
+        "value": "40px"
+      },
+      {
+        "name": "castanha-border-radius-extra-large",
+        "value": "32px"
+      },
+      {
+        "name": "castanha-border-radius-extra-small",
+        "value": "8px"
+      },
+      {
+        "name": "castanha-border-radius-large",
+        "value": "24px"
+      },
+      {
+        "name": "castanha-border-radius-medium",
+        "value": "16px"
+      },
+      {
+        "name": "castanha-border-radius-micro",
+        "value": "4px"
+      },
+      {
+        "name": "castanha-border-radius-none",
+        "value": "0px"
+      },
+      {
+        "name": "castanha-border-radius-pill",
+        "value": "1000px"
+      },
+      {
+        "name": "castanha-border-radius-quark",
+        "value": "2px"
+      },
+      {
+        "name": "castanha-border-radius-small",
+        "value": "12px"
+      }
+    ]
+  },
+  "lineHeight": {
+    "tokens": [
+      {
+        "name": "castanha-font-line-height-large",
+        "value": "1.6"
+      },
+      {
+        "name": "castanha-font-line-height-medium",
+        "value": "1.5"
+      },
+      {
+        "name": "castanha-font-line-height-small",
+        "value": "1.2"
+      }
+    ]
+  },
+  "fontSize": {
+    "tokens": [
+      {
+        "name": "castanha-font-size-12",
+        "value": "12px"
+      },
+      {
+        "name": "castanha-font-size-14",
+        "value": "14px"
+      },
+      {
+        "name": "castanha-font-size-16",
+        "value": "16px"
+      },
+      {
+        "name": "castanha-font-size-18",
+        "value": "18px"
+      },
+      {
+        "name": "castanha-font-size-20",
+        "value": "20px"
+      },
+      {
+        "name": "castanha-font-size-24",
+        "value": "24px"
+      },
+      {
+        "name": "castanha-font-size-28",
+        "value": "28px"
+      },
+      {
+        "name": "castanha-font-size-32",
+        "value": "32px"
+      },
+      {
+        "name": "castanha-font-size-40",
+        "value": "40px"
+      },
+      {
+        "name": "castanha-font-size-48",
+        "value": "48px"
+      },
+      {
+        "name": "castanha-font-size-56",
+        "value": "56px"
+      },
+      {
+        "name": "castanha-font-size-64",
+        "value": "64px"
+      },
+      {
+        "name": "castanha-font-size-72",
+        "value": "72px"
+      },
+      {
+        "name": "castanha-font-size-80",
+        "value": "80px"
+      },
+      {
+        "name": "castanha-font-size-92",
+        "value": "92px"
+      },
+      {
+        "name": "castanha-font-size-120",
+        "value": "120px"
+      },
+      {
+        "name": "castanha-text-fields-text-min-width",
+        "value": "320px"
+      },
+      {
+        "name": "castanha-text-fields-text-max-width",
+        "value": "846px"
+      },
+      {
+        "name": "castanha-text-fields-password-min-width",
+        "value": "320px"
+      },
+      {
+        "name": "castanha-text-fields-password-max-width",
+        "value": "846px"
+      }
+    ]
+  },
+  "fontWeight": {
+    "tokens": [
+      {
+        "name": "castanha-font-weight-bold",
+        "value": "700"
+      },
+      {
+        "name": "castanha-font-weight-light",
+        "value": "300"
+      },
+      {
+        "name": "castanha-font-weight-medium",
+        "value": "500"
+      },
+      {
+        "name": "castanha-font-weight-regular",
+        "value": "400"
+      },
+      {
+        "name": "castanha-font-weight-extra-bold",
+        "value": "900"
+      }
+    ]
+  },
+  "other": {
+    "tokens": [
+      {
+        "name": "castanha-opacity-intense",
+        "value": "0.64"
+      },
+      {
+        "name": "castanha-opacity-light",
+        "value": "0.32"
+      },
+      {
+        "name": "castanha-opacity-medium",
+        "value": "0.4"
+      },
+      {
+        "name": "castanha-opacity-opaque",
+        "value": "1"
+      },
+      {
+        "name": "castanha-opacity-semi-transparent",
+        "value": "0.16"
+      },
+      {
+        "name": "castanha-opacity-semi-opaque",
+        "value": "0.8"
+      },
+      {
+        "name": "castanha-opacity-transparent",
+        "value": "0"
+      },
+      {
+        "name": "castanha-tab-view-indicator-step",
+        "value": "calc(48px + 8px)"
+      },
+      {
+        "name": "castanha-tab-view-indicator-from",
+        "value": "0"
+      },
+      {
+        "name": "castanha-tab-view-indicator-to",
+        "value": "0"
+      },
+      {
+        "name": "grid-columns",
+        "value": "12"
+      }
+    ]
+  }
+}
