@@ -11,8 +11,12 @@ dependencies {
     testImplementation(projects.core.domain)
 }
 
+// Relatórios reais opcionais (fora do git): o diretório pode não existir, como no CI.
+val localFixtures = rootProject.layout.projectDirectory.dir("local-fixtures")
 tasks.withType<Test>().configureEach {
-    val dir = rootProject.layout.projectDirectory.dir("local-fixtures").asFile.absolutePath
-    systemProperty("localFixturesDir", dir)
-    inputs.dir(dir).optional().withPropertyName("localFixtures")
+    systemProperty("localFixturesDir", localFixtures.asFile.absolutePath)
+    inputs
+        .files(fileTree(localFixtures) { include("*.pdf") })
+        .withPropertyName("localFixtures")
+        .withPathSensitivity(PathSensitivity.RELATIVE)
 }
