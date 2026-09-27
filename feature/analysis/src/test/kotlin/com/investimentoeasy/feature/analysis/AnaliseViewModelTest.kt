@@ -6,6 +6,7 @@ import com.investimentoeasy.core.ai.paraJson
 import com.investimentoeasy.core.domain.analise.AnaliseGuardada
 import com.investimentoeasy.core.seguranca.CofreDeChave
 import com.investimentoeasy.core.testing.FakeRepositorioDeAnalises
+import com.investimentoeasy.core.testing.FakeRepositorioDeComplementos
 import com.investimentoeasy.core.testing.FakeSnapshotRepository
 import com.investimentoeasy.core.testing.INSTANTE_FIXO
 import com.investimentoeasy.core.testing.relogioFixo
@@ -18,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
@@ -42,6 +44,8 @@ class AnaliseViewModelTest {
             }
         }
     private val chavesUsadas = mutableListOf<String>()
+    private val pedidos = mutableListOf<com.investimentoeasy.core.ai.PedidoAoModelo>()
+    private val complementos = FakeRepositorioDeComplementos()
     private var resposta: RespostaDoModelo =
         RespostaDoModelo.Texto(
             Cenarios.saida.paraJson(),
@@ -60,9 +64,18 @@ class AnaliseViewModelTest {
         val fabrica =
             FabricaDeModelo { chave ->
                 chavesUsadas += chave
-                com.investimentoeasy.core.ai.ModeloDeLinguagem { resposta }
+                com.investimentoeasy.core.ai.ModeloDeLinguagem { pedido ->
+                    pedidos += pedido
+                    resposta
+                }
             }
-        return AnaliseViewModel(repo, analises, cofre, fabrica, relogioFixo(), dispatcher).apply { carregar() }
+        return AnaliseViewModel(
+            FontesDaAnalise(repo, analises, complementos),
+            cofre,
+            fabrica,
+            relogioFixo(),
+            dispatcher,
+        ).apply { carregar() }
     }
 
     @Test
@@ -100,7 +113,7 @@ class AnaliseViewModelTest {
         analises.salvas.single().let {
             it.snapshotId shouldBe Cenarios.snapshot.id
             it.geradaEm shouldBe INSTANTE_FIXO
-            it.versaoPrompt shouldBe "analise-v1"
+            it.versaoPrompt shouldBe "analise-v2"
         }
     }
 
@@ -152,4 +165,16 @@ class AnaliseViewModelTest {
         vm.estado.value.temChave shouldBe false
         cofre.chave.shouldBeNull()
     }
+
+    @Test
+    fun `planilha guardada entra no estado e na entrada do Claude`() =
+        runTest {
+            complementos.salvar(Cenarios.complemento)
+            cofre.gravar("sk-ant-teste")
+            val vm = viewModel()
+            vm.estado.value.complemento shouldBe Cenarios.complemento
+            vm.gerarAnalise()
+            pedidos.single().mensagem shouldContain "\"dataPlanilha\":\"2026-06-21\""
+            pedidos.single().mensagem shouldContain "\"precoMedio\":\"151.23\""
+        }
 }

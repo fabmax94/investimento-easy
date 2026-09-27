@@ -10,6 +10,10 @@ import com.investimentoeasy.core.domain.analise.Ritmo
 import com.investimentoeasy.core.domain.analise.RitmoAtivo
 import com.investimentoeasy.core.domain.analise.Severidade
 import com.investimentoeasy.core.domain.analise.TipoLacuna
+import com.investimentoeasy.core.domain.complemento.BaseDoCusto
+import com.investimentoeasy.core.domain.complemento.ComplementoPlanilha
+import com.investimentoeasy.core.domain.complemento.resultadoDe
+import com.investimentoeasy.core.model.Posicao
 
 /** Badges sempre com ícone e rótulo, nunca só cor (skill, seção 9). */
 fun rotuloRitmo(ritmo: RitmoAtivo?): String =
@@ -93,3 +97,30 @@ val TipoLacuna.rotulo: String
 /** "20000.00" (valor decidido pelo modelo) → "R$ 20.000". */
 fun valorSugerido(valor: String): String =
     valor.toBigDecimalOrNull()?.let { Formatacao.reais(com.investimentoeasy.core.model.Money.of(it), centavos = false) } ?: valor
+
+/**
+ * Linha de custo e resultado sob o nome do ativo, a partir da planilha: "PM R$ 95,00 · +R$ 1.100 (+5,79%)".
+ * `null` sem planilha para a posição (regra zero: nada de zero implícito).
+ */
+fun linhaResultado(
+    complemento: ComplementoPlanilha?,
+    posicao: Posicao,
+): String? {
+    val dados = complemento?.de(posicao.ativo.chave) ?: return null
+    if (dados.quantidadeMudou) return "Qtd. mudou desde a planilha"
+    val resultado = resultadoDe(posicao, dados) ?: return null
+    val custo =
+        when (resultado.baseDoCusto) {
+            BaseDoCusto.PRECO_MEDIO -> "PM ${Formatacao.reais(dados.precoMedio)}"
+            BaseDoCusto.VALOR_APLICADO -> "Aplicado ${Formatacao.reais(resultado.custo, centavos = false)}"
+        }
+    val ganho = Formatacao.reais(resultado.resultado, centavos = false, comSinal = true)
+    return "$custo · $ganho (${Formatacao.percentual(resultado.percentual, comSinal = true)})"
+}
+
+/** Junta o apoio de cada aba com a linha de resultado, quando há planilha. */
+fun apoioComResultado(
+    complemento: ComplementoPlanilha?,
+    posicao: Posicao,
+    apoio: String,
+): String = listOfNotNull(apoio, linhaResultado(complemento, posicao)).joinToString("\n")

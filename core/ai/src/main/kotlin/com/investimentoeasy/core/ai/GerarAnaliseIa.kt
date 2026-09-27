@@ -1,6 +1,7 @@
 package com.investimentoeasy.core.ai
 
 import com.investimentoeasy.core.domain.analise.AnaliseDeterministica
+import com.investimentoeasy.core.domain.complemento.ComplementoPlanilha
 import com.investimentoeasy.core.model.Snapshot
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
@@ -30,8 +31,9 @@ public class GerarAnaliseIa(
     public operator fun invoke(
         snapshot: Snapshot,
         analise: AnaliseDeterministica,
+        complemento: ComplementoPlanilha? = null,
     ): ResultadoAnaliseIa {
-        val entrada = montarEntrada(snapshot, analise)
+        val entrada = montarEntrada(snapshot, analise, complemento)
         val validador = ValidadorDeNumeros(entrada)
         val dados = JSON.encodeToString(EntradaAnalise.serializer(), entrada)
         var resultado = tentar(dados, correcao = null, validador, numero = 1)
@@ -87,7 +89,7 @@ public class GerarAnaliseIa(
         }
 
     public companion object {
-        public const val VERSAO_PROMPT: String = "analise-v1"
+        public const val VERSAO_PROMPT: String = "analise-v2"
         private val JSON = Json { ignoreUnknownKeys = true }
         internal val PROMPT: String =
             requireNotNull(GerarAnaliseIa::class.java.getResource("/prompts/$VERSAO_PROMPT.md")) { "Prompt $VERSAO_PROMPT ausente" }

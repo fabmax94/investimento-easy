@@ -11,9 +11,10 @@ snapshot confiável e, entre um upload e outro, acompanha a carteira com dados p
 | Módulo | Conteúdo |
 |---|---|
 | `app` | Activity, navegação (barra inferior do protótipo), Hilt |
-| `feature:upload` | Telas Enviar carteira e Revisar extração (R1, R3, R6, R8, R15) |
+| `feature:upload` | Telas Enviar carteira, Revisar extração (R1, R3, R6, R8, R15) e Conferir planilha |
 | `feature:portfolio` | Tela Carteira (base confirmada e alocação) |
 | `feature:analysis` | Tela Análise: 7 abas, Ritmo/Cenário, alertas e a leitura do Claude |
+| `parser:xlsx` | Leitor .xlsx sem POI (zip + XML, sem DTD, com limites) e parser da Posição Detalhada da XP |
 | `core:ai` | Camada 3: entrada sem dado pessoal, chamada ao Claude, validação de cada número citado |
 | `core:seguranca` | Chave da API cifrada (AES-GCM, Android Keystore) |
 | `core:designsystem` | Tema Castanha (cores geradas do protótipo), tipografia, formatação pt-BR, componentes |

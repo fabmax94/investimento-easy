@@ -14,6 +14,8 @@ import com.investimentoeasy.core.domain.analise.AnalisarCarteira
 import com.investimentoeasy.core.domain.analise.AnaliseDeterministica
 import com.investimentoeasy.core.domain.analise.AnaliseGuardada
 import com.investimentoeasy.core.domain.analise.RepositorioDeAnalises
+import com.investimentoeasy.core.domain.complemento.ComplementoPlanilha
+import com.investimentoeasy.core.domain.complemento.RepositorioDeComplementos
 import com.investimentoeasy.core.domain.snapshot.SnapshotRepository
 import com.investimentoeasy.core.model.Snapshot
 import com.investimentoeasy.core.seguranca.CofreDeChave
@@ -28,6 +30,15 @@ import kotlinx.coroutines.withContext
 import java.time.Clock
 import java.time.Instant
 import javax.inject.Inject
+
+/** O que a análise lê e grava: base, análises do Claude e dados da planilha. */
+class FontesDaAnalise
+    @Inject
+    constructor(
+        val snapshots: SnapshotRepository,
+        val analises: RepositorioDeAnalises,
+        val complementos: RepositorioDeComplementos,
+    )
 
 /** As 7 abas da skill, na ordem do protótipo. */
 enum class AbaAnalise(
@@ -58,6 +69,8 @@ data class EstadoAnalise(
     val temChave: Boolean = false,
     val gerando: Boolean = false,
     val erro: String? = null,
+    /** Dados da planilha "Posição Detalhada" guardados para a base, se o usuário enviou. */
+    val complemento: ComplementoPlanilha? = null,
 )
 
 /**
@@ -68,8 +81,7 @@ data class EstadoAnalise(
 class AnaliseViewModel
     @Inject
     constructor(
-        private val snapshots: SnapshotRepository,
-        private val analises: RepositorioDeAnalises,
+        private val fontes: FontesDaAnalise,
         private val cofre: CofreDeChave,
         private val fabrica: FabricaDeModelo,
         private val relogio: Clock,
@@ -91,19 +103,21 @@ class AnaliseViewModel
                         deterministica = carregado.deterministica,
                         ia = carregado.ia,
                         temChave = carregado.temChave,
+                        complemento = carregado.complemento,
                     )
                 }
             }
         }
 
         private suspend fun carregarDoDisco(): EstadoAnalise {
-            val base = snapshots.base()
-            val guardada = base?.let { analises.ultima(it.id) }
+            val base = fontes.snapshots.base()
+            val guardada = base?.let { fontes.analises.ultima(it.id) }
             return EstadoAnalise(
                 base = base,
                 deterministica = base?.let(analisar::invoke),
                 ia = guardada?.let { g -> saidaDeJson(g.conteudoJson)?.let { AnaliseIa(it, g.geradaEm, g.modelo) } },
                 temChave = cofre.ler() != null,
+                complemento = base?.let { fontes.complementos.ultimo(it.id) },
             )
         }
 
@@ -136,9 +150,11 @@ class AnaliseViewModel
                 val resultado =
                     withContext(io) {
                         val chave = cofre.ler() ?: return@withContext null
-                        val r = GerarAnaliseIa(fabrica.criar(chave))(base, deterministica)
+                        val r = GerarAnaliseIa(fabrica.criar(chave))(base, deterministica, atual.complemento)
                         if (r is ResultadoAnaliseIa.Gerada) {
-                            analises.salvar(AnaliseGuardada(base.id, relogio.instant(), r.modelo, r.versaoPrompt, r.saida.paraJson()))
+                            fontes.analises.salvar(
+                                AnaliseGuardada(base.id, relogio.instant(), r.modelo, r.versaoPrompt, r.saida.paraJson()),
+                            )
                         }
                         r
                     }

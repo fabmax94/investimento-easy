@@ -31,7 +31,7 @@ class GerarAnaliseIaTest {
         val gerada = GerarAnaliseIa(modelo)(Cenario.snapshot, Cenario.analise).shouldBeInstanceOf<ResultadoAnaliseIa.Gerada>()
         gerada.tentativas shouldBe 1
         gerada.modelo shouldBe "claude-opus-5"
-        gerada.versaoPrompt shouldBe "analise-v1"
+        gerada.versaoPrompt shouldBe "analise-v2"
         val pedido = modelo.pedidos.single()
         pedido.sistema shouldContain "Regra zero"
         pedido.mensagem shouldContain "\"somaDasPosicoes\":\"50000.00\""

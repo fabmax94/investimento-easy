@@ -15,12 +15,15 @@ import com.investimentoeasy.core.ai.StatusDiagnostico
 import com.investimentoeasy.core.ai.TextoAba
 import com.investimentoeasy.core.domain.analise.AnalisarCarteira
 import com.investimentoeasy.core.domain.analise.TipoLacuna
+import com.investimentoeasy.core.domain.complemento.CasarPlanilha
+import com.investimentoeasy.core.domain.complemento.ComplementoPlanilha
 import com.investimentoeasy.core.importacao.ArquivoRecebido
 import com.investimentoeasy.core.importacao.ExtratorDeTextoPdf
 import com.investimentoeasy.core.importacao.ImportarRelatorio
 import com.investimentoeasy.core.importacao.ResultadoImportacao
 import com.investimentoeasy.core.model.Snapshot
 import com.investimentoeasy.core.model.StatusSnapshot
+import com.investimentoeasy.parser.xlsx.FixturesPlanilhaXp
 import com.investimentoeasy.parser.xperformance.FixturesXPerformance
 import java.time.Instant
 
@@ -33,6 +36,13 @@ internal object Cenarios {
         ).revisao.rascunho!!.copy(status = StatusSnapshot.CONFIRMADO)
 
     val deterministica = AnalisarCarteira()(snapshot)
+
+    /** Planilha sintética casada com a base sintética. */
+    val complemento: ComplementoPlanilha =
+        (
+            ImportarRelatorio(ExtratorDeTextoPdf { emptyList() })
+                .importar(ArquivoRecebido("p.xlsx", null, FixturesPlanilhaXp.bytes())) as ResultadoImportacao.PlanilhaLida
+        ).let { CasarPlanilha()(snapshot, it.planilha, Instant.parse("2026-09-13T12:00:00Z")).complemento }
 
     val saida =
         SaidaAnalise(
@@ -68,6 +78,7 @@ internal object Cenarios {
         ia: Boolean = false,
         aba: AbaAnalise = AbaAnalise.O_QUE_FAZER,
         temChave: Boolean = false,
+        comPlanilha: Boolean = false,
     ) = EstadoAnalise(
         carregando = false,
         base = snapshot,
@@ -75,5 +86,6 @@ internal object Cenarios {
         ia = if (ia) AnaliseIa(saida, Instant.parse("2026-09-13T12:00:00Z"), "claude-opus-5") else null,
         aba = aba,
         temChave = temChave,
+        complemento = if (comPlanilha) complemento else null,
     )
 }

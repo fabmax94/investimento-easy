@@ -96,4 +96,26 @@ class AnaliseScreenTest {
         compose.onNodeWithText("● URGENTE").assertExists()
         compose.onNodeWithText("Dois ativos concentram a exposição global.").assertExists()
     }
+
+    @Test
+    fun fiis_e_acoes_com_planilha_mostram_custo_e_resultado() {
+        var aba by mutableStateOf(AbaAnalise.FIIS)
+        compose.setContent {
+            CastanhaTema(escuro = false) {
+                AnaliseScreen(Cenarios.estado(aba = aba, comPlanilha = true), {}, {}, {}, {})
+            }
+        }
+        compose.onNodeWithText("PM R$ 95,00", substring = true).assertExists()
+        compose.onNodeWithText("ⓘ PREÇO MÉDIO E RESULTADO").assertDoesNotExist()
+        capturar("analise_fiis_com_planilha")
+        aba = AbaAnalise.ACOES_ETFS
+        compose.waitForIdle()
+        compose.onNodeWithText("PM R$ 151,23", substring = true).assertExists()
+    }
+
+    @Test
+    fun sem_planilha_explica_de_onde_vem_o_preco_medio() {
+        tela(Cenarios.estado(aba = AbaAnalise.FIIS))
+        compose.onNodeWithText("ⓘ PREÇO MÉDIO E RESULTADO").assertExists()
+    }
 }

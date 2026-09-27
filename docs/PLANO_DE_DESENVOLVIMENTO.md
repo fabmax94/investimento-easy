@@ -37,8 +37,11 @@
 | A3 Camada 3 com o Claude (SDK Java, saída estruturada, prompt versionado sem dado pessoal, validador de números) | ✅ (testado só contra servidor falso) | `core/ai/` |
 | A3b Chave da API cifrada com AES-GCM no Android Keystore | ✅ (Keystore real precisa de teste instrumentado) | `core/seguranca/` |
 | A4 Tela 5 Análise: 7 abas, veredicto, plano de 30 dias, Ritmo/Cenário, origem, disclaimer, análise guardada | ✅ | `feature/analysis/` |
+| T1.10 Planilha "Posição Detalhada" (.xlsx): leitor seguro + parser; complementa a base (preço médio, valor aplicado, taxa/datas da RF, proventos) | ✅ validado contra uma planilha real | `parser/xlsx/`, `core/domain/.../complemento/` |
+| T1.10b Casamento planilha × base (chave R4 e, para fundos, palavras do nome), tela "Conferir planilha", Room v4 | ✅ | `feature/upload/`, `core/database/` |
+| T1.10c Custo e resultado estimado nas abas e na entrada do Claude (prompt `analise-v2`) | ✅ | `core/ai/`, `feature/analysis/` |
 
-Números atuais: 247 testes (JVM e Robolectric), cobertura agregada de 94% sem código gerado,
+Números atuais: 310 testes (JVM e Robolectric), cobertura agregada de 95% sem código gerado,
 screenshots versionados em claro, escuro e fonte 200%.
 
 **Aprendizados do relatório real** (incorporados ao código e aos testes):
@@ -290,7 +293,7 @@ Primeira entrega útil: **Fase 0 + T1.1 a T1.6** (modelo, regras de validação 
 1. **Uso:** só pessoal → local-first, sem backend, chave do Claude no Keystore (ADR-0002).
 2. **Fixtures:** o usuário enviou um PDF XPerformance real. Como o repositório é **público**, ele não é
    versionado: a fixture é sintética, com o mesmo layout. Relatórios reais ficam em `local-fixtures/`
-   (ignorado pelo git) e são testados por `XPerformanceRelatorioRealTest`. Ainda falta um .xlsx de posição.
+   (ignorado pelo git) e são testados por `XPerformanceRelatorioRealTest`; planilhas .xlsx reais, por `PlanilhaRealTest`.
 3. **Cotações:** apenas fontes gratuitas.
 4. **minSdk 26**, targetSdk mais recente.
 5. **Design system:** derivar do protótipo (T0.6).

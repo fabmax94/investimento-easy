@@ -2,8 +2,12 @@ package com.investimentoeasy.core.ai
 
 import com.investimentoeasy.core.domain.analise.AnaliseDeterministica
 import com.investimentoeasy.core.domain.analise.AtivoAnalisado
+import com.investimentoeasy.core.domain.complemento.ComplementoPlanilha
+import com.investimentoeasy.core.domain.complemento.DadosDaPlanilha
+import com.investimentoeasy.core.domain.complemento.resultadoDe
 import com.investimentoeasy.core.model.Money
 import com.investimentoeasy.core.model.Percent
+import com.investimentoeasy.core.model.Posicao
 import com.investimentoeasy.core.model.Snapshot
 import kotlinx.serialization.Serializable
 
@@ -30,6 +34,9 @@ public data class EntradaAnalise(
     val lacunas: List<LacunaEntrada>,
     val alertas: List<AlertaEntrada>,
     val dadosAusentes: List<String>,
+    /** Data da planilha "Posição Detalhada" que complementa a base, se houver. */
+    val dataPlanilha: String? = null,
+    val proventosPrevistos: List<ProventoEntrada> = emptyList(),
 )
 
 @Serializable
@@ -51,6 +58,30 @@ public data class PosicaoEntrada(
     val cenario: String,
     val cenarioDriver: String,
     val dadoAConferirComAssessor: Boolean,
+    val planilha: PlanilhaEntrada? = null,
+)
+
+/** O que a planilha acrescenta à posição; o resultado é estimado pelo app (saldo da base menos o custo). */
+@Serializable
+public data class PlanilhaEntrada(
+    val valorAplicado: String?,
+    val precoMedio: String?,
+    val rentabilidadeDesdeInicio: String?,
+    val dataAplicacao: String?,
+    val vencimento: String?,
+    val irEstimado: String?,
+    val quantidadeMudouDesdeAPlanilha: Boolean,
+    val custoEstimado: String?,
+    val resultadoEstimado: String?,
+    val resultadoEstimadoPercentual: String?,
+)
+
+@Serializable
+public data class ProventoEntrada(
+    val ativo: String,
+    val evento: String,
+    val valorLiquido: String,
+    val dataPagamento: String?,
 )
 
 @Serializable
@@ -106,12 +137,13 @@ public data class AlertaEntrada(
 public fun montarEntrada(
     snapshot: Snapshot,
     analise: AnaliseDeterministica,
+    complemento: ComplementoPlanilha? = null,
 ): EntradaAnalise =
     EntradaAnalise(
         dataReferencia = snapshot.dataReferencia.toString(),
         patrimonioInformado = snapshot.patrimonioInformado?.valor?.t(),
         somaDasPosicoes = analise.total.t(),
-        posicoes = analise.ativos.map(::posicaoEntrada),
+        posicoes = analise.ativos.map { posicaoEntrada(it, complemento) },
         alocacao = analise.alocacao.map { FatiaEntrada(it.grupo.name, it.quantidadeAtivos, it.valor.t(), it.percentual?.t()) },
         gestoras = analise.gestoras.map { ConcentracaoEntrada(it.nome, it.valor.t(), it.percentual.t(), it.quantidadeAtivos) },
         emissoresComFgc =
@@ -146,11 +178,40 @@ public fun montarEntrada(
             analise.alertas.map {
                 AlertaEntrada(it.severidade.name, it.regra.name, it.titulo, it.ativos, it.valor?.t(), it.percentual?.t())
             },
-        dadosAusentes = DADOS_AUSENTES + (if (snapshot.contexto == null) listOf(SEM_CONTEXTO) else emptyList()),
+        dadosAusentes = dadosAusentes(snapshot, analise, complemento),
+        dataPlanilha = complemento?.dataPlanilha?.toString(),
+        proventosPrevistos =
+            complemento?.proventos.orEmpty().map {
+                ProventoEntrada(
+                    it.ativo,
+                    it.evento,
+                    it.valorLiquido.t(),
+                    it.dataPagamento?.toString(),
+                )
+            },
     )
 
-private fun posicaoEntrada(a: AtivoAnalisado): PosicaoEntrada {
+private fun dadosAusentes(
+    snapshot: Snapshot,
+    analise: AnaliseDeterministica,
+    complemento: ComplementoPlanilha?,
+): List<String> {
+    val semPlanilha = analise.ativos.map { it.posicao }.filter { complemento?.de(it.ativo.chave) == null }.map { it.ativo.nome }
+    val custo =
+        when {
+            complemento == null -> listOf(SEM_PRECO_MEDIO)
+            semPlanilha.isNotEmpty() -> listOf("$SEM_PRECO_MEDIO, para: ${semPlanilha.joinToString(", ")}")
+            else -> emptyList()
+        }
+    return custo + DADOS_AUSENTES + (if (snapshot.contexto == null) listOf(SEM_CONTEXTO) else emptyList())
+}
+
+private fun posicaoEntrada(
+    a: AtivoAnalisado,
+    complemento: ComplementoPlanilha?,
+): PosicaoEntrada {
     val p = a.posicao
+    val dados = complemento?.de(p.ativo.chave)
     return PosicaoEntrada(
         nome = p.ativo.nome,
         tipo = p.ativo.tipo.name,
@@ -169,13 +230,32 @@ private fun posicaoEntrada(a: AtivoAnalisado): PosicaoEntrada {
         cenario = a.cenario.cenario.name,
         cenarioDriver = a.cenario.driver,
         dadoAConferirComAssessor = a.dadoAConferir,
+        planilha = dados?.let { planilhaEntrada(p, it) },
+    )
+}
+
+private fun planilhaEntrada(
+    posicao: Posicao,
+    dados: DadosDaPlanilha,
+): PlanilhaEntrada {
+    val resultado = resultadoDe(posicao, dados)
+    return PlanilhaEntrada(
+        valorAplicado = dados.valorAplicado?.t(),
+        precoMedio = dados.precoMedio?.t(),
+        rentabilidadeDesdeInicio = dados.rentabilidadeDesdeInicio?.t(),
+        dataAplicacao = dados.dataAplicacao?.toString(),
+        vencimento = dados.vencimento?.toString(),
+        irEstimado = dados.ir?.t(),
+        quantidadeMudouDesdeAPlanilha = dados.quantidadeMudou,
+        custoEstimado = resultado?.custo?.t(),
+        resultadoEstimado = resultado?.resultado?.t(),
+        resultadoEstimadoPercentual = resultado?.percentual?.t(),
     )
 }
 
 /** Lacunas conhecidas da fonte (seção 2 da skill): o Claude não deve afirmar nada sobre elas. */
 private val DADOS_AUSENTES =
     listOf(
-        "Preço médio de aquisição (sem ele não há cálculo de lucro ou prejuízo realizado)",
         "Cotação, P/VP, dividend yield e vacância dos FIIs (dados de mercado ainda não integrados)",
         "Selic atual e expectativas de mercado",
         "Retornos de 3 e 6 meses e de 12 meses por ativo",
@@ -183,6 +263,8 @@ private val DADOS_AUSENTES =
         "Composição interna dos fundos (sobreposição exata entre fundos e ETFs)",
         "Perfil do investidor e alocação-alvo (ainda não informados)",
     )
+
+private const val SEM_PRECO_MEDIO = "Preço médio e valor aplicado (sem eles não há cálculo de lucro ou prejuízo)"
 
 private const val SEM_CONTEXTO = "Índices de referência e evolução mensal (snapshot anterior à versão que guarda esses dados)"
 

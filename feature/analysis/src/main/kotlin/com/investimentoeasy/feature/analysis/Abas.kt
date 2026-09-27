@@ -269,7 +269,13 @@ fun AbaFundos(
     if (fundos.isEmpty()) {
         Text("Sem fundos na carteira.", style = Castanha.tipografia.corpo, color = Castanha.cores.textMedium)
     } else {
-        TabelaRitmoCenario(fundos, apoio = { "${Formatacao.percentual(it.posicao.percentualCdiAno?.valor, casas = 0)} do CDI no ano" })
+        TabelaRitmoCenario(fundos, apoio = {
+            apoioComResultado(
+                estado.complemento,
+                it.posicao,
+                "${Formatacao.percentual(it.posicao.percentualCdiAno?.valor, casas = 0)} do CDI no ano",
+            )
+        })
         NotaRitmoCenario()
     }
     estado.ia?.let { NotasDoClaude(it.saida.fundos.notas) }
@@ -308,8 +314,15 @@ fun AbaFiis(
                 }
             }
         }
-        TabelaRitmoCenario(fiis, apoio = { "${Formatacao.percentual(it.posicao.rentabilidadeAno?.valor, casas = 2)} no ano" })
+        TabelaRitmoCenario(fiis, apoio = {
+            apoioComResultado(
+                estado.complemento,
+                it.posicao,
+                "${Formatacao.percentual(it.posicao.rentabilidadeAno?.valor, casas = 2)} no ano",
+            )
+        })
         NotaRitmoCenario()
+        SemPlanilha(estado)
         CartaoAviso(Tom.INFORMATIVO, "ⓘ DADOS DE MERCADO", "P/VP, dividend yield e vacância ainda não entram no app.")
     }
     estado.ia?.let { NotasDoClaude(it.saida.fiis.notas) }
@@ -324,8 +337,11 @@ fun AbaAcoesEtfs(
     if (renda.isEmpty()) {
         Text("Sem ações, ETFs ou BDRs na carteira.", style = Castanha.tipografia.corpo, color = Castanha.cores.textMedium)
     } else {
-        TabelaRitmoCenario(renda, apoio = { Formatacao.reais(it.posicao.saldo.valor, centavos = false) })
+        TabelaRitmoCenario(renda, apoio = {
+            apoioComResultado(estado.complemento, it.posicao, Formatacao.reais(it.posicao.saldo.valor, centavos = false))
+        })
         NotaRitmoCenario()
+        SemPlanilha(estado)
     }
     if (d.simbolicas.isNotEmpty()) {
         Secao("Posições simbólicas") {

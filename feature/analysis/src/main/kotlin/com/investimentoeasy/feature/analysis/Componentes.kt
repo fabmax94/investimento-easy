@@ -93,3 +93,14 @@ fun Secao(
         conteudo()
     }
 }
+
+/** Sem a planilha, não há preço médio: diz de onde vem esse dado. */
+@Composable
+internal fun SemPlanilha(estado: EstadoAnalise) {
+    if (estado.complemento != null) return
+    CartaoAviso(
+        Tom.INFORMATIVO,
+        "ⓘ PREÇO MÉDIO E RESULTADO",
+        "Envie a planilha Posição Detalhada da XP na aba Enviar para ver o custo e o resultado de cada posição.",
+    )
+}
