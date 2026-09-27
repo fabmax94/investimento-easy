@@ -24,6 +24,7 @@ include(":core:model")
 include(":core:domain")
 include(":core:testing")
 include(":parser:xperformance")
+include(":parser:xlsx")
 include(":core:importacao")
 include(":core:ai")
 

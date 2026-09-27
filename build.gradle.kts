@@ -10,6 +10,7 @@ dependencies {
     kover(projects.core.importacao)
     kover(projects.core.ai)
     kover(projects.parser.xperformance)
+    kover(projects.parser.xlsx)
     kover(projects.core.database)
     kover(projects.core.documentos)
     kover(projects.core.designsystem)
