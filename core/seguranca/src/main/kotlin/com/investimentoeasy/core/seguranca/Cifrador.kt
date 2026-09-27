@@ -2,7 +2,6 @@ package com.investimentoeasy.core.seguranca
 
 import android.util.Base64
 import java.security.GeneralSecurityException
-import java.security.SecureRandom
 import javax.crypto.Cipher
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
@@ -10,14 +9,18 @@ import javax.crypto.spec.GCMParameterSpec
 /**
  * AES-GCM com IV aleatório por mensagem, gravado junto do texto cifrado. A chave vem de fora:
  * no aparelho, do Android Keystore (não exportável); nos testes, uma chave de software.
+ *
+ * O IV é gerado pela própria cifra, nunca por nós: chaves do Keystore exigem criptografia
+ * aleatória e recusam IV informado pelo chamador ("Caller-provided IV not permitted").
  */
 class Cifrador(
     private val chave: () -> SecretKey,
 ) {
     fun cifrar(texto: String): String {
         val cifra = Cipher.getInstance(TRANSFORMACAO)
-        val iv = ByteArray(TAMANHO_IV).also(SecureRandom()::nextBytes)
-        cifra.init(Cipher.ENCRYPT_MODE, chave(), GCMParameterSpec(BITS_TAG, iv))
+        cifra.init(Cipher.ENCRYPT_MODE, chave())
+        val iv = cifra.iv
+        check(iv != null && iv.size == TAMANHO_IV) { "IV inesperado da cifra: ${iv?.size} bytes" }
         return Base64.encodeToString(iv + cifra.doFinal(texto.toByteArray(Charsets.UTF_8)), Base64.NO_WRAP)
     }
 

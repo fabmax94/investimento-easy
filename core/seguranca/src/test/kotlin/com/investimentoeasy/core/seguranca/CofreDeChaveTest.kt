@@ -51,4 +51,21 @@ class CofreDeChaveTest {
     fun `chave vazia e recusada`() {
         shouldThrow<IllegalArgumentException> { cofre.gravar("   ") }
     }
+
+    @Test
+    fun `chave que recusa IV do chamador, como a do Keystore, cifra e decifra`() {
+        ProvedorComoKeystore.instalar()
+        val material = KeyGenerator.getInstance("AES").apply { init(256) }.generateKey().encoded
+        val cofreComoNoAparelho = CofreDeChaveCifrado(preferencias, Cifrador { ChaveComoKeystore(material) })
+        cofreComoNoAparelho.gravar("sk-ant-no-aparelho")
+        cofreComoNoAparelho.ler() shouldBe "sk-ant-no-aparelho"
+    }
+
+    @Test
+    fun `falha do armazenamento seguro vira excecao do cofre, nunca derruba o app`() {
+        val quebrado = CofreDeChaveCifrado(preferencias, Cifrador { throw java.security.ProviderException("Keystore indisponível") })
+        shouldThrow<CofreIndisponivelException> { quebrado.gravar("sk-ant-x") }
+        cofre.gravar("sk-ant-guardada")
+        quebrado.ler().shouldBeNull()
+    }
 }

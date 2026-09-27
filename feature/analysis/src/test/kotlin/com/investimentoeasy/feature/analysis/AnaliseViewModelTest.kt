@@ -5,6 +5,7 @@ import com.investimentoeasy.core.ai.RespostaDoModelo
 import com.investimentoeasy.core.ai.paraJson
 import com.investimentoeasy.core.domain.analise.AnaliseGuardada
 import com.investimentoeasy.core.seguranca.CofreDeChave
+import com.investimentoeasy.core.seguranca.CofreIndisponivelException
 import com.investimentoeasy.core.testing.FakeRepositorioDeAnalises
 import com.investimentoeasy.core.testing.FakeRepositorioDeComplementos
 import com.investimentoeasy.core.testing.FakeSnapshotRepository
@@ -32,10 +33,12 @@ class AnaliseViewModelTest {
     private val cofre =
         object : CofreDeChave {
             var chave: String? = null
+            var falhar = false
 
             override fun ler() = chave
 
             override fun gravar(chave: String) {
+                if (falhar) throw CofreIndisponivelException(java.security.ProviderException("Keystore"))
                 this.chave = chave
             }
 
@@ -177,4 +180,14 @@ class AnaliseViewModelTest {
             pedidos.single().mensagem shouldContain "\"dataPlanilha\":\"2026-06-21\""
             pedidos.single().mensagem shouldContain "\"precoMedio\":\"151.23\""
         }
+
+    @Test
+    fun `falha do armazenamento seguro ao salvar a chave vira mensagem, sem derrubar o app`() {
+        cofre.falhar = true
+        val vm = viewModel()
+        vm.salvarChave("sk-ant-teste")
+        vm.estado.value.temChave shouldBe false
+        vm.estado.value.erro shouldBe ERRO_COFRE
+        cofre.chave.shouldBeNull()
+    }
 }

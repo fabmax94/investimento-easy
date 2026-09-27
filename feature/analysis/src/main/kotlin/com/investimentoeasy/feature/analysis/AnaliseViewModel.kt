@@ -19,6 +19,7 @@ import com.investimentoeasy.core.domain.complemento.RepositorioDeComplementos
 import com.investimentoeasy.core.domain.snapshot.SnapshotRepository
 import com.investimentoeasy.core.model.Snapshot
 import com.investimentoeasy.core.seguranca.CofreDeChave
+import com.investimentoeasy.core.seguranca.CofreIndisponivelException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -128,8 +129,18 @@ class AnaliseViewModel
         fun salvarChave(chave: String) {
             if (chave.isBlank()) return
             viewModelScope.launch {
-                withContext(io) { cofre.gravar(chave) }
-                _estado.update { it.copy(temChave = true, erro = null) }
+                val gravou =
+                    withContext(io) {
+                        try {
+                            cofre.gravar(chave)
+                            true
+                        } catch (_: CofreIndisponivelException) {
+                            false
+                        }
+                    }
+                _estado.update {
+                    if (gravou) it.copy(temChave = true, erro = null) else it.copy(temChave = false, erro = ERRO_COFRE)
+                }
             }
         }
 
@@ -175,6 +186,9 @@ class AnaliseViewModel
             }
         }
     }
+
+internal const val ERRO_COFRE =
+    "Não foi possível guardar a chave no armazenamento seguro do aparelho. Tente de novo; se continuar, reinicie o celular."
 
 internal fun mensagemRejeitada(r: ResultadoAnaliseIa.Rejeitada): String =
     "A resposta do Claude citou dados que não existem na sua carteira e foi descartada " +
