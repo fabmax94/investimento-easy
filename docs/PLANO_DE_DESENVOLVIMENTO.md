@@ -9,18 +9,32 @@
 
 | Task | Status | Onde |
 |---|---|---|
-| T0.1 Setup do repositório (Gradle, version catalog, build-logic) | ✅ parcial: módulos JVM | `settings.gradle.kts`, `build-logic/` |
-| T0.2 Qualidade (ktlint, detekt, Kover agregado ≥ 85%) | ✅ | `config/detekt/`, `.editorconfig` |
-| T0.3 CI GitHub Actions + template de PR | ✅ | `.github/` |
-| T0.4 Setup do Android SDK | ⛔ bloqueado: rede do ambiente nega `dl.google.com` (Google Maven) | — |
+| T0.1 Setup do repositório (Gradle, version catalog, build-logic) | ✅ | `settings.gradle.kts`, `build-logic/` |
+| T0.2 Qualidade (ktlint, detekt, Android Lint com avisos como erro, Kover ≥ 85% agregado) | ✅ | `config/`, `.editorconfig` |
+| T0.3 CI GitHub Actions + template de PR | ✅ (falta publicar o APK como artefato: ver §7) | `.github/` |
+| T0.4 Setup do Android SDK | ✅ sem `sdkmanager`: licenças + download pelo AGP | `scripts/setup-android-sdk.sh` |
 | T0.5 `core:testing` (relógio fixo, fakes, builders) | ✅ | `core/testing/` |
+| T0.6 Design system Castanha (tokens do protótipo, claro/escuro, componentes, screenshots) | ✅ | `core/designsystem/` |
 | T0.7 ADRs | ✅ | `docs/adr/` |
 | T1.1 `core:model` | ✅ | `core/model/` |
 | T1.2 Classificação R4/R5 | ✅ | `core/domain/.../classificacao/` |
 | T1.3 Validações R1, R3, R6 (R7 no parser) | ✅ | `core/domain/.../validacao/` |
-| T1.6 `PrepararRevisao` + `ConfirmarSnapshot` R8/R15/R16 | ✅ (domínio; persistência Room na T1.4) | `core/domain/.../snapshot/` |
-| T1.7 Fixtures | ✅ sintéticas (o repositório é público) | `parser/xperformance/src/test/resources/` |
-| T1.9 Parser XPerformance | ✅ validado também contra um relatório real, fora do git | `parser/xperformance/` |
+| T1.4 Room com histórico imutável (R16 no DAO e em triggers) | ✅ | `core/database/` |
+| T1.4b SQLCipher + chave no Keystore | ⏳ próxima (precisa de teste instrumentado) | — |
+| T1.5 Arquivo original criptografado | ⏳ | — |
+| T1.6 `PrepararRevisao` + `ConfirmarSnapshot` R8/R15/R16 | ✅ | `core/domain/.../snapshot/` |
+| T1.7 Fixtures | ✅ sintéticas (repositório público) | `parser/xperformance/src/testFixtures/` |
+| T1.8 Texto do PDF no Android (PdfBox-Android) | ✅ validado contra um relatório real | `core/documentos/` |
+| T1.9 Parser XPerformance | ✅ | `parser/xperformance/` |
+| T1.11 Orquestração da importação (formato, tamanho, falhas) | ✅ | `core/importacao/` |
+| T1.12 Alocação por grupo (parte da Camada 1) | ✅ | `core/domain/.../alocacao/` |
+| T1.21 App, navegação e Hilt | ✅ | `app/` |
+| T1.22 Tela Enviar carteira | ✅ | `feature/upload/` |
+| T1.23 Tela Revisar extração | ✅ (sem "corrigir um campo" ainda) | `feature/upload/` |
+| Tela 1 Carteira (versão Fase 1: base confirmada, sem estimativa) | ✅ | `feature/portfolio/` |
+
+Números atuais: 175 testes (JVM e Robolectric), cobertura agregada de 94% sem código gerado,
+screenshots versionados em claro, escuro e fonte 200%.
 
 **Aprendizados do relatório real** (incorporados ao código e aos testes):
 - O texto usa espaço não separável (U+00A0) depois de `R$`; o parser normaliza os espaços.
@@ -194,7 +208,7 @@ Legenda de tamanho: **P** ≤ 1 dia · **M** 2–3 dias · **G** 4–5 dias. Dep
 | # | Task | Tam. | Regras | Critério de aceite |
 |---|---|---|---|---|
 | T1.21 | Navegação (Compose Navigation type-safe) e shell do app | P [T0.6] | — | Rotas das 6 telas + onboarding |
-| T1.22 | Tela 2 — Enviar carteira: seletor de arquivo (SAF), etapas da leitura, erros | M [T1.11] | R1, R2, R3, R7 | UI tests por estado; screenshot |
+| T1.22 | Tela 2 — Enviar carteira: seletor de arquivo (SAF), etapas da leitura, erros (feito em `:feature:upload`, junto com a T1.23: as duas telas dividem o mesmo fluxo) | M [T1.11] | R1, R2, R3, R7 | UI tests por estado; screenshot |
 | T1.23 | Tela 3 — Revisar extração: resumo, posições por classe, itens a conferir, edição de campo, bloqueio de confirmação por divergência | G [T1.6, T1.22] | R3, R6, R8 | Botão Confirmar desabilitado > 0,5% até aceite explícito |
 | T1.24 | Onboarding de perfil: alocação-alvo, colchão, objetivo (opcional) | M [T1.21] | R23 | Perfil ausente usa regras de concentração padrão |
 | T1.25 | Tela 5 — Análise: 7 abas, veredicto, plano de 30 dias, Ritmo/Cenário, chip de origem em cada número, disclaimer | G [T1.19] | Regra zero | Screenshot por aba; disclaimer sempre presente |
@@ -276,9 +290,10 @@ Primeira entrega útil: **Fase 0 + T1.1 a T1.6** (modelo, regras de validação 
 4. **minSdk 26**, targetSdk mais recente.
 5. **Design system:** derivar do protótipo (T0.6).
 
-## 7. Bloqueios
+## 7. Pendências de ambiente
 
-- **Google Maven (`dl.google.com`) negado pela política de rede do ambiente de desenvolvimento
-  remoto.** Sem ele não há Android Gradle Plugin, AndroidX nem Compose. Até liberar, o trabalho segue
-  nos módulos Kotlin/JVM (domínio, cálculos, parsers). Para liberar: nas configurações do ambiente,
-  em *Network access*, adicionar `dl.google.com` e `maven.google.com` (ou um nível de acesso mais amplo).
+- ~~Google Maven bloqueado~~: liberado em 27/09.
+- **Workflow do CI**: a sessão de desenvolvimento não tem permissão para editar `.github/workflows/`.
+  Mudança proposta para o `ci.yml`: rodar `./scripts/setup-android-sdk.sh` antes do `check`, subir o
+  `timeout-minutes` para 40 e publicar `app/build/outputs/apk/debug/app-debug.apk` com
+  `actions/upload-artifact` (para instalar o app direto pelo GitHub).

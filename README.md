@@ -10,22 +10,34 @@ snapshot confiável e, entre um upload e outro, acompanha a carteira com dados p
 
 | Módulo | Conteúdo |
 |---|---|
-| `core:model` | Tipos de domínio: `Money`, `Percent`, `Sourced`/`Origem`, `ChaveAtivo` (R4), `Snapshot`, `ExtracaoCarteira` |
-| `core:domain` | Classificação (R5), validação (R1, R3, R6), revisão e confirmação de snapshot (R8, R15, R16) |
+| `app` | Activity, navegação (barra inferior do protótipo), Hilt |
+| `feature:upload` | Telas Enviar carteira e Revisar extração (R1, R3, R6, R8, R15) |
+| `feature:portfolio` | Tela Carteira (base confirmada e alocação) |
+| `core:designsystem` | Tema Castanha (cores geradas do protótipo), tipografia, formatação pt-BR, componentes |
+| `core:ui` | UI compartilhada que conhece o domínio (lista de alocação) |
+| `core:database` | Room; histórico imutável (R16) no DAO e em triggers do SQLite |
+| `core:documentos` | Texto do PDF (PdfBox-Android) e leitura do arquivo escolhido |
+| `core:importacao` | Arquivo → texto → parser → revisão, com as falhas previstas |
+| `core:common` | Relógio e dispatchers injetáveis |
+| `core:model` | `Money`, `Percent`, `Sourced`/`Origem`, `ChaveAtivo` (R4), `Snapshot`, `ExtracaoCarteira` |
+| `core:domain` | Classificação (R5), validação (R1, R3, R6), confirmação (R8, R15, R16), alocação |
 | `core:testing` | Fakes e builders para testes |
 | `parser:xperformance` | Parser determinístico do relatório XPerformance (R2, R7) |
 
-Os módulos Android entram quando o ambiente tiver acesso ao Google Maven (ver plano, §7).
+Regra de dependência: `feature → core:ui → core:designsystem`, `feature → core:domain → core:model`;
+os módulos de domínio e parser são Kotlin/JVM puros.
 
 ## Desenvolvimento
 
 ```bash
-./gradlew check          # ktlint, detekt, testes e cobertura mínima agregada (Kover, 85%)
-./gradlew ktlintFormat   # formata o código
-./gradlew koverHtmlReport
+./scripts/setup-android-sdk.sh   # uma vez: licenças do SDK e local.properties
+./gradlew check                  # ktlint, detekt, Android Lint, testes, screenshots e cobertura (Kover, 85%)
+./gradlew :app:assembleDebug     # APK em app/build/outputs/apk/debug/
+./gradlew recordRoborazziDebug   # regrava os screenshots depois de uma mudança visual intencional
+./gradlew ktlintFormat
 ```
 
-Requer JDK 17+ (o bytecode é gerado para Java 17).
+Requer JDK 17+ e acesso a `dl.google.com`/`maven.google.com` (o AGP baixa plataforma e build-tools).
 
 ### Dados pessoais
 
