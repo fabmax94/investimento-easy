@@ -87,7 +87,9 @@ private fun Catalogo() {
         }
         TituloSecao("Precisa da sua atenção (2)")
         CartaoAviso(Tom.ATENCAO, "▲ DADO FORA DO PLAUSÍVEL", "LFTB11 aparece com +34,36% no mês.")
-        CartaoAviso(Tom.NEGATIVO, "● URGENTE", "Posição com quantidade e saldo zero.") { BotaoTexto("Conferir", onClick = {}) }
+        CartaoAviso(Tom.NEGATIVO, "● URGENTE", "Posição com quantidade e saldo zero.") {
+            BotaoTexto("Conferir", onClick = {}, alinhadoAoTexto = true)
+        }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Etiqueta("Pronto", Tom.POSITIVO)
             Etiqueta("Neutro", Tom.NEUTRO)
