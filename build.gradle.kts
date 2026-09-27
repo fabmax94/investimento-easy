@@ -8,6 +8,7 @@ dependencies {
     kover(projects.core.model)
     kover(projects.core.domain)
     kover(projects.core.importacao)
+    kover(projects.core.ai)
     kover(projects.parser.xperformance)
     kover(projects.core.database)
     kover(projects.core.documentos)
