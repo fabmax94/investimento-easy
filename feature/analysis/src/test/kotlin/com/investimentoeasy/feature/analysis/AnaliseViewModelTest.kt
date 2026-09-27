@@ -49,6 +49,8 @@ class AnaliseViewModelTest {
     private val chavesUsadas = mutableListOf<String>()
     private val pedidos = mutableListOf<com.investimentoeasy.core.ai.PedidoAoModelo>()
     private val complementos = FakeRepositorioDeComplementos()
+    private var explodir = false
+    private var incompativel = false
     private var resposta: RespostaDoModelo =
         RespostaDoModelo.Texto(
             Cenarios.saida.paraJson(),
@@ -69,6 +71,8 @@ class AnaliseViewModelTest {
                 chavesUsadas += chave
                 com.investimentoeasy.core.ai.ModeloDeLinguagem { pedido ->
                     pedidos += pedido
+                    check(!explodir) { "erro do SDK no Android" }
+                    if (incompativel) throw NoClassDefFoundError("java/beans/Introspector")
                     resposta
                 }
             }
@@ -189,5 +193,25 @@ class AnaliseViewModelTest {
         vm.estado.value.temChave shouldBe false
         vm.estado.value.erro shouldBe ERRO_COFRE
         cofre.chave.shouldBeNull()
+    }
+
+    @Test
+    fun `erro inesperado ao gerar vira mensagem, sem derrubar o app`() {
+        cofre.gravar("sk-ant-teste")
+        explodir = true
+        val vm = viewModel()
+        vm.gerarAnalise()
+        vm.estado.value.gerando shouldBe false
+        vm.estado.value.erro!! shouldContain "falha inesperada (IllegalStateException)"
+        analises.salvas shouldHaveSize 0
+    }
+
+    @Test
+    fun `SDK incompativel com o Android vira mensagem, sem derrubar o app`() {
+        cofre.gravar("sk-ant-teste")
+        incompativel = true
+        val vm = viewModel()
+        vm.gerarAnalise()
+        vm.estado.value.erro!! shouldContain "falha inesperada (NoClassDefFoundError)"
     }
 }

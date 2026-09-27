@@ -97,4 +97,13 @@ class ClaudeModeloTest {
         servidor.shutdown()
         modelo.gerar(pedido) shouldBe RespostaDoModelo.SemConexao
     }
+
+    @Test
+    fun `erro fora do previsto pelo SDK vira resposta de erro, nao crash`() {
+        val cliente = io.mockk.mockk<com.anthropic.client.AnthropicClient>()
+        io.mockk.every { cliente.messages().create(any<com.anthropic.models.messages.MessageCreateParams>()) } throws
+            SecurityException("Permission denied (missing INTERNET permission?)")
+        val resposta = ClaudeModelo(cliente).gerar(pedido).shouldBeInstanceOf<RespostaDoModelo.Erro>()
+        resposta.mensagem shouldBe "falha inesperada (SecurityException: Permission denied (missing INTERNET permission?))"
+    }
 }

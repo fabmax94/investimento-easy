@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Só a Camada 3 (análise do Claude, quando o usuário pede) usa a rede, e só por HTTPS. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <!--
         Dados financeiros pessoais (R7 / LGPD): sem backup automático nem transferência entre
         aparelhos; apenas HTTPS.

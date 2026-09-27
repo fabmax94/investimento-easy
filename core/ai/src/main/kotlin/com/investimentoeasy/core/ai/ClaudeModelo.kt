@@ -27,6 +27,9 @@ public class ClaudeModelo(
     private val cliente: AnthropicClient,
     private val modelo: String = MODELO_PADRAO,
 ) : ModeloDeLinguagem {
+    // O SDK só converte falhas de E/S em AnthropicIoException; qualquer outra (ex.: SecurityException
+    // sem a permissão de rede, erro de desserialização no Android) viraria crash do app.
+    @Suppress("TooGenericExceptionCaught")
     override fun gerar(pedido: PedidoAoModelo): RespostaDoModelo =
         try {
             val resposta = cliente.messages().create(parametros(pedido))
@@ -49,6 +52,8 @@ public class ClaudeModelo(
             RespostaDoModelo.Erro("Erro da API (${e.statusCode()})")
         } catch (_: AnthropicIoException) {
             RespostaDoModelo.SemConexao
+        } catch (e: RuntimeException) {
+            RespostaDoModelo.Erro("falha inesperada (${e::class.java.simpleName}: ${e.message.orEmpty().take(MAX_DETALHE)})")
         }
 
     private fun parametros(pedido: PedidoAoModelo): MessageCreateParams =
@@ -85,6 +90,7 @@ public class ClaudeModelo(
         public const val MODELO_PADRAO: String = "claude-opus-5"
         internal const val BETA_FALLBACK = "server-side-fallback-2026-07-01"
         private const val MAX_TOKENS = 16_000L
+        private const val MAX_DETALHE = 120
         private val TIMEOUT: Duration = Duration.ofMinutes(5)
 
         public fun comChave(

@@ -84,7 +84,7 @@ class AnaliseViewModel
     constructor(
         private val fontes: FontesDaAnalise,
         private val cofre: CofreDeChave,
-        private val fabrica: FabricaDeModelo,
+        private val fabricaDeModelo: FabricaDeModelo,
         private val relogio: Clock,
         @param:Io private val io: CoroutineDispatcher,
     ) : ViewModel() {
@@ -161,7 +161,7 @@ class AnaliseViewModel
                 val resultado =
                     withContext(io) {
                         val chave = cofre.ler() ?: return@withContext null
-                        val r = GerarAnaliseIa(fabrica.criar(chave))(base, deterministica, atual.complemento)
+                        val r = gerarSemDerrubar(chave, base, deterministica, atual.complemento)
                         if (r is ResultadoAnaliseIa.Gerada) {
                             fontes.analises.salvar(
                                 AnaliseGuardada(base.id, relogio.instant(), r.modelo, r.versaoPrompt, r.saida.paraJson()),
@@ -185,6 +185,26 @@ class AnaliseViewModel
                 }
             }
         }
+
+        /** Última barreira: qualquer falha inesperada vira mensagem na tela, com o tipo do erro para diagnóstico. */
+        @Suppress("TooGenericExceptionCaught")
+        private fun gerarSemDerrubar(
+            chave: String,
+            base: Snapshot,
+            deterministica: AnaliseDeterministica,
+            complemento: ComplementoPlanilha?,
+        ): ResultadoAnaliseIa =
+            try {
+                GerarAnaliseIa(fabricaDeModelo.criar(chave))(base, deterministica, complemento)
+            } catch (e: RuntimeException) {
+                falhaInesperada(e)
+            } catch (e: LinkageError) {
+                // Classe ou método do SDK que não existe no Android: melhor mostrar do que fechar o app.
+                falhaInesperada(e)
+            }
+
+        private fun falhaInesperada(e: Throwable) =
+            ResultadoAnaliseIa.Falhou(RespostaDoModelo.Erro("falha inesperada (${e::class.java.simpleName})"))
     }
 
 internal const val ERRO_COFRE =

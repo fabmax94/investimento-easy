@@ -42,6 +42,13 @@ class AppNavegacaoTest {
         compose.waitUntil(TEMPO_MAXIMO_MS) { compose.onAllNodesWithText("Nenhuma carteira ainda").fetchSemanticsNodes().isNotEmpty() }
 
     @Test
+    fun declara_a_permissao_de_internet_para_a_analise_do_claude() {
+        val contexto = compose.activity
+        val info = contexto.packageManager.getPackageInfo(contexto.packageName, android.content.pm.PackageManager.GET_PERMISSIONS)
+        info.requestedPermissions.orEmpty().toList().contains(android.Manifest.permission.INTERNET) shouldBe true
+    }
+
+    @Test
     fun abre_na_carteira_vazia_com_a_barra_inferior() {
         esperarCarteiraVazia()
         compose.onNodeWithTag("aba_CARTEIRA").assertIsSelected()
