@@ -70,6 +70,17 @@ class GerarAnaliseIaTest {
 
     @Test
     fun `prompt versionado nao tem dado pessoal`() {
-        listOf("6371184", "Murilo", "Fabio", "272").forEach { GerarAnaliseIa.PROMPT shouldNotContain it }
+        // Sem identificadores concretos: nenhum número longo (conta) e nenhum campo de cabeçalho preenchido.
+        GerarAnaliseIa.PROMPT shouldNotContain Regex("""\d{6,}""")
+        GerarAnaliseIa.PROMPT shouldNotContain Regex("""(?i)\b(conta|assessor)\s*[:=]\s*\S""")
+    }
+}
+
+class SaidaJsonTest {
+    @Test
+    fun `ida e volta do JSON guardado e JSON invalido`() {
+        val saida = Cenario.saida()
+        saidaDeJson(saida.paraJson()) shouldBe saida
+        saidaDeJson("{\"outro\": 1}") shouldBe null
     }
 }

@@ -32,8 +32,13 @@
 | T1.22 Tela Enviar carteira | ✅ | `feature/upload/` |
 | T1.23 Tela Revisar extração | ✅ (sem "corrigir um campo" ainda) | `feature/upload/` |
 | Tela 1 Carteira (versão Fase 1: base confirmada, sem estimativa) | ✅ | `feature/portfolio/` |
+| A1 Dados do relatório para a análise (%CDI, índices, evolução mensal) + migrações Room v1→v3 | ✅ | `core/model/`, `core/database/` |
+| A2 Motor Camadas 1 e 2 (Ritmo, Cenário, gestora, FGC, vencimentos, simbólicas, saques, RV global, lacunas, alertas por severidade) | ✅ | `core/domain/.../analise/` |
+| A3 Camada 3 com o Claude (SDK Java, saída estruturada, prompt versionado sem dado pessoal, validador de números) | ✅ (testado só contra servidor falso) | `core/ai/` |
+| A3b Chave da API cifrada com AES-GCM no Android Keystore | ✅ (Keystore real precisa de teste instrumentado) | `core/seguranca/` |
+| A4 Tela 5 Análise: 7 abas, veredicto, plano de 30 dias, Ritmo/Cenário, origem, disclaimer, análise guardada | ✅ | `feature/analysis/` |
 
-Números atuais: 175 testes (JVM e Robolectric), cobertura agregada de 94% sem código gerado,
+Números atuais: 247 testes (JVM e Robolectric), cobertura agregada de 94% sem código gerado,
 screenshots versionados em claro, escuro e fonte 200%.
 
 **Aprendizados do relatório real** (incorporados ao código e aos testes):

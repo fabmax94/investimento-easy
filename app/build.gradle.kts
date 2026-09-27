@@ -15,6 +15,13 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    packaging {
+        resources {
+            // Metadados duplicados das dependências do SDK do Claude (httpclient5, jackson).
+            excludes += setOf("META-INF/DEPENDENCIES", "META-INF/LICENSE*", "META-INF/NOTICE*", "META-INF/INDEX.LIST")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -32,6 +39,9 @@ dependencies {
     implementation(projects.core.documentos)
     implementation(projects.feature.upload)
     implementation(projects.feature.portfolio)
+    implementation(projects.feature.analysis)
+    implementation(projects.core.ai)
+    implementation(projects.core.seguranca)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation.compose)

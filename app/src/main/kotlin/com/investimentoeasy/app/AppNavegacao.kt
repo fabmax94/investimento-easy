@@ -33,6 +33,8 @@ import com.investimentoeasy.core.designsystem.Icones
 import com.investimentoeasy.core.designsystem.componentes.CabecalhoTela
 import com.investimentoeasy.core.designsystem.componentes.CartaoAviso
 import com.investimentoeasy.core.designsystem.componentes.Tom
+import com.investimentoeasy.feature.analysis.RotaAnalise
+import com.investimentoeasy.feature.analysis.analise
 import com.investimentoeasy.feature.portfolio.RotaCarteira
 import com.investimentoeasy.feature.portfolio.carteira
 import com.investimentoeasy.feature.upload.Conclusao
@@ -41,9 +43,6 @@ import com.investimentoeasy.feature.upload.importacao
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlin.reflect.KClass
-
-@Serializable
-data object RotaAnalise
 
 @Serializable
 data object RotaAlertas
@@ -83,13 +82,7 @@ fun AppNavegacao(navController: NavHostController = rememberNavController()) {
     ) { margens ->
         NavHost(navController, startDestination = RotaCarteira, modifier = Modifier.padding(margens)) {
             carteira(aoEnviar = { navController.irPara(Aba.ENVIAR) })
-            composable<RotaAnalise> {
-                EmBreve(
-                    "Análise",
-                    "A análise completa (as 7 abas: mercado, alocação, fundos, FIIs, ações e ETFs, alertas e o que fazer) " +
-                        "chega junto com o motor de análise, ainda na Fase 1.",
-                )
-            }
+            analise()
             composable<RotaAlertas> {
                 EmBreve("Alertas", "Os alertas de concentração, vencimento e queda chegam na Fase 2, com o acompanhamento diário.")
             }

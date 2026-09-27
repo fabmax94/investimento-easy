@@ -16,5 +16,6 @@ dependencies {
     kover(projects.core.ui)
     kover(projects.feature.upload)
     kover(projects.feature.portfolio)
+    kover(projects.feature.analysis)
     kover(projects.app)
 }

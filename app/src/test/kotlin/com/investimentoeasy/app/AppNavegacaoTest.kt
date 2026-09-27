@@ -57,7 +57,7 @@ class AppNavegacaoTest {
     @Test
     fun abas_de_analise_e_alertas() {
         compose.onNodeWithTag("aba_ANALISE").performClick()
-        compose.onNodeWithText("ⓘ EM CONSTRUÇÃO").assertExists()
+        compose.onNodeWithText("Sem carteira para analisar").assertExists()
         compose.onNodeWithTag("aba_ALERTAS").performClick()
         compose.onNodeWithTag("aba_ALERTAS").assertIsSelected()
         compose.onNodeWithTag("aba_CARTEIRA").performClick()

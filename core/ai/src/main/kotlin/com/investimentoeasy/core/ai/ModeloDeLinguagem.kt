@@ -28,3 +28,8 @@ public sealed interface RespostaDoModelo {
 
     public data class Erro(val mensagem: String) : RespostaDoModelo
 }
+
+/** Cria o modelo com a chave do usuário (lida do cofre só na hora de gerar). */
+public fun interface FabricaDeModelo {
+    public fun criar(chave: String): ModeloDeLinguagem
+}

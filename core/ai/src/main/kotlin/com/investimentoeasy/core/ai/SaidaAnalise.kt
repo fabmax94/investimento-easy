@@ -131,3 +131,16 @@ internal object EsquemaSaida {
             "alertas" to objeto("comentarios" to lista(objeto("regra" to texto(), "texto" to texto()))),
         )
 }
+
+private val JSON_SAIDA = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+
+/** JSON guardado no banco (já validado quando foi gerado). */
+public fun SaidaAnalise.paraJson(): String = JSON_SAIDA.encodeToString(SaidaAnalise.serializer(), this)
+
+/** `null` se o JSON guardado não corresponde mais ao esquema (ex.: versão antiga do app). */
+public fun saidaDeJson(json: String): SaidaAnalise? =
+    try {
+        JSON_SAIDA.decodeFromString(SaidaAnalise.serializer(), json)
+    } catch (_: kotlinx.serialization.SerializationException) {
+        null
+    }
