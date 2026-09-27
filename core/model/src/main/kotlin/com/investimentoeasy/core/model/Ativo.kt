@@ -57,7 +57,7 @@ public sealed interface ChaveAtivo {
     }
 
     public data class Tesouro(val titulo: String, val vencimento: YearMonth?) : ChaveAtivo {
-        override val id: String get() = "TESOURO:$titulo:${vencimento ?: "?"}"
+        override val id: String get() = "TESOURO:$titulo:${vencimento ?: AUSENTE}"
     }
 
     /** CDB, LCI, LCA, LC, debêntures, CRI e CRA: emissor + indexador + taxa + vencimento. */
@@ -68,11 +68,54 @@ public sealed interface ChaveAtivo {
         val taxa: Percent?,
         val vencimento: YearMonth,
     ) : ChaveAtivo {
-        override val id: String get() = "CREDITO:$tipo:$emissor:${indexador ?: "?"}:${taxa ?: "?"}:$vencimento"
+        override val id: String get() = "CREDITO:$tipo:$emissor:${indexador ?: AUSENTE}:${taxa?.let(::taxaId) ?: AUSENTE}:$vencimento"
     }
 
-    private companion object {
-        const val CNPJ_DIGITS = 14
+    public companion object {
+        private const val CNPJ_DIGITS = 14
+        private const val AUSENTE = "?"
+
+        private fun taxaId(taxa: Percent): String = taxa.pontos.stripTrailingZeros().toPlainString() + "%"
+
+        /**
+         * Reconstrói a chave a partir do [id] canônico (usado na persistência).
+         * Campos do meio (emissor, título, nome) podem conter ":"; os das pontas, não.
+         */
+        public fun deId(id: String): ChaveAtivo {
+            val tipo = id.substringBefore(':')
+            val resto = id.substringAfter(':', missingDelimiterValue = "")
+            require(resto.isNotEmpty()) { "Id de ativo inválido: $id" }
+            return when (tipo) {
+                "TICKER" -> Ticker(resto)
+                "CNPJ" -> Cnpj(resto)
+                "FUNDO" -> FundoPorNome(resto)
+                "TESOURO" -> Tesouro(resto.substringBeforeLast(':'), vencimentoDe(resto.substringAfterLast(':')))
+                "CREDITO" -> creditoDe(resto, id)
+                else -> throw IllegalArgumentException("Tipo de chave desconhecido: $id")
+            }
+        }
+
+        private fun creditoDe(
+            resto: String,
+            id: String,
+        ): CreditoPrivado {
+            val tipo = TipoAtivo.valueOf(resto.substringBefore(':'))
+            val semTipo = resto.substringAfter(':')
+            val finais = semTipo.split(':').takeLast(CAMPOS_FINAIS_CREDITO)
+            require(finais.size == CAMPOS_FINAIS_CREDITO) { "Id de crédito inválido: $id" }
+            val (indexador, taxa, vencimento) = finais
+            return CreditoPrivado(
+                tipo = tipo,
+                emissor = semTipo.split(':').dropLast(CAMPOS_FINAIS_CREDITO).joinToString(":"),
+                indexador = indexador.takeIf { it != AUSENTE }?.let(Indexador::valueOf),
+                taxa = taxa.takeIf { it != AUSENTE }?.let { Percent.of(it.removeSuffix("%")) },
+                vencimento = requireNotNull(vencimentoDe(vencimento)) { "Crédito sem vencimento: $id" },
+            )
+        }
+
+        private fun vencimentoDe(texto: String): YearMonth? = texto.takeIf { it != AUSENTE }?.let(YearMonth::parse)
+
+        private const val CAMPOS_FINAIS_CREDITO = 3
     }
 }
 
