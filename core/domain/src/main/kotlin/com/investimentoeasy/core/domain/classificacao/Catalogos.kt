@@ -25,6 +25,12 @@ public object CatalogoFiiPadrao : CatalogoFii {
     override fun segmento(raizTicker: String): SegmentoFii? = segmentos[raizTicker.uppercase()]
 }
 
+/**
+ * FIIs de tijolo em lajes corporativas ou agências bancárias: no Cenário ficam neutros
+ * (o juro ajuda, a vacância estrutural não).
+ */
+public val FIIS_LAJE_OU_AGENCIA: Set<String> = setOf("TEPP", "TVRI", "PVBI", "RBRP", "HGRE", "BRCR", "JSRE", "RCRB")
+
 /** ETFs de renda variável brasileira conhecidos; ticker 11 fora da lista é ambíguo (ETF ou unit). */
 public val ETFS_BRASIL_CONHECIDOS: Set<String> =
     setOf(
