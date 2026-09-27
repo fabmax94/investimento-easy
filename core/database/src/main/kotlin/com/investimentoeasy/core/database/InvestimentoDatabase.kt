@@ -2,11 +2,12 @@ package com.investimentoeasy.core.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [SnapshotEntity::class, PosicaoEntity::class, BaseEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 internal abstract class InvestimentoDatabase : RoomDatabase() {
@@ -33,5 +34,19 @@ internal abstract class InvestimentoDatabase : RoomDatabase() {
 
     companion object {
         const val NOME = "investimento.db"
+
+        /** v2: %CDI por posição e o contexto do relatório (índices, série e evolução mensal). */
+        val MIGRACAO_1_2: Migration =
+            object : Migration(1, 2) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    listOf("percentualCdiMes", "percentualCdiAno", "percentualCdi24Meses").forEach { coluna ->
+                        db.execSQL("ALTER TABLE posicao ADD COLUMN $coluna TEXT")
+                        db.execSQL("ALTER TABLE posicao ADD COLUMN ${coluna}Origem TEXT")
+                    }
+                    db.execSQL("ALTER TABLE snapshot ADD COLUMN contexto TEXT")
+                }
+            }
+
+        val MIGRACOES: Array<Migration> = arrayOf(MIGRACAO_1_2)
     }
 }

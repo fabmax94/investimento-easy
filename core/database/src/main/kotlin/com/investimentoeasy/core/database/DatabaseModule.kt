@@ -22,6 +22,7 @@ internal object DatabaseModule {
         Room
             .databaseBuilder(context, InvestimentoDatabase::class.java, InvestimentoDatabase.NOME)
             .addCallback(InvestimentoDatabase.Imutabilidade)
+            .addMigrations(*InvestimentoDatabase.MIGRACOES)
             .build()
 
     @Provides

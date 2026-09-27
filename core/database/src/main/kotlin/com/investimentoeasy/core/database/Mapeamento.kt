@@ -14,10 +14,13 @@ import com.investimentoeasy.core.model.SnapshotId
 import com.investimentoeasy.core.model.Sourced
 import com.investimentoeasy.core.model.StatusSnapshot
 import com.investimentoeasy.core.model.TipoAtivo
+import kotlinx.serialization.json.Json
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
+
+private val JSON = Json { ignoreUnknownKeys = true }
 
 internal fun Snapshot.paraEntidade(): SnapshotEntity {
     check(status == StatusSnapshot.CONFIRMADO) { "Só snapshots confirmados são persistidos" }
@@ -30,6 +33,7 @@ internal fun Snapshot.paraEntidade(): SnapshotEntity {
         versao = versao,
         confirmadoEm = confirmadoEm?.toEpochMilli(),
         divergenciaAceita = divergenciaAceita,
+        contexto = contexto?.let(ContextoJson::de)?.let(JSON::encodeToString),
     )
 }
 
@@ -57,6 +61,12 @@ internal fun Snapshot.posicoesParaEntidades(): List<PosicaoEntity> =
             rentabilidadeAnoOrigem = p.rentabilidadeAno?.origem?.name,
             rentabilidade24Meses = p.rentabilidade24Meses?.valor?.pontos?.toPlainString(),
             rentabilidade24MesesOrigem = p.rentabilidade24Meses?.origem?.name,
+            percentualCdiMes = p.percentualCdiMes?.valor?.pontos?.toPlainString(),
+            percentualCdiMesOrigem = p.percentualCdiMes?.origem?.name,
+            percentualCdiAno = p.percentualCdiAno?.valor?.pontos?.toPlainString(),
+            percentualCdiAnoOrigem = p.percentualCdiAno?.origem?.name,
+            percentualCdi24Meses = p.percentualCdi24Meses?.valor?.pontos?.toPlainString(),
+            percentualCdi24MesesOrigem = p.percentualCdi24Meses?.origem?.name,
         )
     }
 
@@ -71,6 +81,7 @@ internal fun SnapshotEntity.paraModelo(posicoes: List<PosicaoEntity>): Snapshot 
         versao = versao,
         confirmadoEm = confirmadoEm?.let(Instant::ofEpochMilli),
         divergenciaAceita = divergenciaAceita,
+        contexto = contexto?.let { JSON.decodeFromString<ContextoJson>(it).paraModelo() },
     )
 
 private fun PosicaoEntity.paraModelo(): Posicao =
@@ -92,6 +103,9 @@ private fun PosicaoEntity.paraModelo(): Posicao =
         rentabilidadeMes = sourced(rentabilidadeMes, rentabilidadeMesOrigem, Percent::of),
         rentabilidadeAno = sourced(rentabilidadeAno, rentabilidadeAnoOrigem, Percent::of),
         rentabilidade24Meses = sourced(rentabilidade24Meses, rentabilidade24MesesOrigem, Percent::of),
+        percentualCdiMes = sourced(percentualCdiMes, percentualCdiMesOrigem, Percent::of),
+        percentualCdiAno = sourced(percentualCdiAno, percentualCdiAnoOrigem, Percent::of),
+        percentualCdi24Meses = sourced(percentualCdi24Meses, percentualCdi24MesesOrigem, Percent::of),
     )
 
 private fun <T> sourced(

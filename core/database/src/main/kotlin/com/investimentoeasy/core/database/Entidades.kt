@@ -19,6 +19,8 @@ internal data class SnapshotEntity(
     val versao: Int,
     val confirmadoEm: Long?,
     val divergenciaAceita: Boolean,
+    /** [ContextoJson] serializado; nulo nos snapshots gravados na versão 1. */
+    val contexto: String? = null,
 )
 
 @Entity(
@@ -50,6 +52,12 @@ internal data class PosicaoEntity(
     val rentabilidadeAnoOrigem: String?,
     val rentabilidade24Meses: String?,
     val rentabilidade24MesesOrigem: String?,
+    val percentualCdiMes: String? = null,
+    val percentualCdiMesOrigem: String? = null,
+    val percentualCdiAno: String? = null,
+    val percentualCdiAnoOrigem: String? = null,
+    val percentualCdi24Meses: String? = null,
+    val percentualCdi24MesesOrigem: String? = null,
 )
 
 /** Linha única que aponta qual snapshot é a base atual da carteira. */

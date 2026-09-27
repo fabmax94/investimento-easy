@@ -4,6 +4,7 @@ import com.investimentoeasy.core.domain.classificacao.AtivoClassificado
 import com.investimentoeasy.core.domain.classificacao.ClassificadorAtivos
 import com.investimentoeasy.core.domain.validacao.ResultadoValidacao
 import com.investimentoeasy.core.domain.validacao.ValidadorExtracao
+import com.investimentoeasy.core.model.ContextoRelatorio
 import com.investimentoeasy.core.model.ExtracaoCarteira
 import com.investimentoeasy.core.model.MetodoExtracao
 import com.investimentoeasy.core.model.Origem
@@ -57,6 +58,9 @@ public class PrepararRevisao(
                     rentabilidadeMes = p.rentabilidadeMes?.let { Sourced(it, origem) },
                     rentabilidadeAno = p.rentabilidadeAno?.let { Sourced(it, origem) },
                     rentabilidade24Meses = p.rentabilidade24Meses?.let { Sourced(it, origem) },
+                    percentualCdiMes = p.percentualCdiMes?.let { Sourced(it, origem) },
+                    percentualCdiAno = p.percentualCdiAno?.let { Sourced(it, origem) },
+                    percentualCdi24Meses = p.percentualCdi24Meses?.let { Sourced(it, origem) },
                 )
             }
         val data = extracao.dataReferencia ?: dataInformadaPeloUsuario
@@ -70,6 +74,13 @@ public class PrepararRevisao(
                     patrimonioInformado = patrimonio?.let { valor -> Sourced(valor, origem) },
                     posicoes = posicoes,
                     metodo = extracao.metodo,
+                    contexto =
+                        ContextoRelatorio(
+                            resumo = extracao.resumo,
+                            referencias = extracao.referencias,
+                            rentabilidadeMensal = extracao.rentabilidadeMensal,
+                            evolucaoMensal = extracao.evolucaoMensal,
+                        ),
                 )
             }
         return Revisao(rascunho, validacao, classificados, extracao)

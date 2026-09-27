@@ -12,7 +12,24 @@ public data class Posicao(
     val rentabilidadeMes: Sourced<Percent>? = null,
     val rentabilidadeAno: Sourced<Percent>? = null,
     val rentabilidade24Meses: Sourced<Percent>? = null,
+    val percentualCdiMes: Sourced<Percent>? = null,
+    val percentualCdiAno: Sourced<Percent>? = null,
+    val percentualCdi24Meses: Sourced<Percent>? = null,
 )
+
+/**
+ * O que o relatório traz além das posições e que a análise usa: resumo, índices de
+ * referência, série mensal da carteira e evolução patrimonial com movimentações.
+ * Tudo com origem RELATORIO (ou IA, se a extração foi por IA).
+ */
+public data class ContextoRelatorio(
+    val resumo: ResumoCarteira?,
+    val referencias: List<IndiceReferencia>,
+    val rentabilidadeMensal: List<RentabilidadeMensal>,
+    val evolucaoMensal: List<EvolucaoMensal>,
+) {
+    public fun referencia(nome: String): IndiceReferencia? = referencias.firstOrNull { it.nome.equals(nome, ignoreCase = true) }
+}
 
 public enum class MetodoExtracao { PARSER, IA }
 
@@ -39,6 +56,8 @@ public data class Snapshot(
     val versao: Int = 1,
     val confirmadoEm: Instant? = null,
     val divergenciaAceita: Boolean = false,
+    /** Ausente em snapshots gravados antes desta informação existir (versão 1 do banco). */
+    val contexto: ContextoRelatorio? = null,
 ) {
     val somaPosicoes: Money get() = posicoes.map { it.saldo.valor }.soma()
 }

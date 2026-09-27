@@ -9,6 +9,7 @@ import com.investimentoeasy.core.domain.snapshot.DecisaoMesmaData
 import com.investimentoeasy.core.domain.snapshot.PrepararRevisao
 import com.investimentoeasy.core.domain.snapshot.ResultadoConfirmacao
 import com.investimentoeasy.core.model.Money
+import com.investimentoeasy.core.model.Percent
 import com.investimentoeasy.core.model.SnapshotId
 import com.investimentoeasy.core.model.StatusSnapshot
 import com.investimentoeasy.core.testing.extracao
@@ -66,6 +67,19 @@ class RoomSnapshotRepositoryTest {
             repo.confirmados() shouldBe listOf(confirmado)
             repo.base() shouldBe confirmado
             confirmado.patrimonioInformado!!.valor shouldBe Money.of("14101.00")
+        }
+
+    @Test
+    fun `contexto do relatorio e percentuais do CDI sobrevivem a gravacao`() =
+        runTest {
+            val revisao = PrepararRevisao(geradorId = geradorSequencial())(ExtracaoSintetica.completa())
+            val confirmado =
+                ConfirmarSnapshot(repo, relogioFixo())(revisao).shouldBeInstanceOf<ResultadoConfirmacao.Confirmado>().snapshot
+            val lido = repo.base()!!
+            lido shouldBe confirmado
+            lido.contexto!!.referencia("CDI")!!.ano shouldBe Percent.of("9.50")
+            lido.contexto!!.evolucaoMensal.single().movimentacoes shouldBe Money.of("-5000.00")
+            lido.posicoes.single().percentualCdiAno!!.valor shouldBe Percent.of("152.35")
         }
 
     @Test
