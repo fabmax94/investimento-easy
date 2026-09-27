@@ -25,12 +25,13 @@ class MigracaoTest {
     private val nome = "migracao-teste.db"
 
     @Test
-    fun `v1 para v2 preserva snapshots, posicoes, base e a imutabilidade`() =
+    fun `v1 ate a versao atual preserva snapshots, posicoes, base e a imutabilidade`() =
         runTest {
             helper.createDatabase(nome, 1).use { v1 ->
                 InvestimentoDatabase.Imutabilidade.onCreate(v1)
                 v1.execSQL(
-                    "INSERT INTO snapshot (id, dataReferencia, patrimonio, patrimonioOrigem, metodo, versao, confirmadoEm, divergenciaAceita) " +
+                    "INSERT INTO snapshot (id, dataReferencia, patrimonio, patrimonioOrigem, metodo, versao, confirmadoEm, " +
+                        "divergenciaAceita) " +
                         "VALUES ('s1', '2026-09-03', '150250.00', 'RELATORIO', 'PARSER', 1, 1790000000000, 0)",
                 )
                 v1.execSQL(
@@ -43,7 +44,7 @@ class MigracaoTest {
                 v1.execSQL("INSERT INTO base (unica, snapshotId) VALUES (1, 's1')")
             }
 
-            helper.runMigrationsAndValidate(nome, 2, true, InvestimentoDatabase.MIGRACAO_1_2).use { v2 ->
+            helper.runMigrationsAndValidate(nome, 3, true, *InvestimentoDatabase.MIGRACOES).use { v2 ->
                 shouldThrow<SQLiteException> { v2.execSQL("UPDATE snapshot SET versao = 2 WHERE id = 's1'") }
                 shouldThrow<SQLiteException> { v2.execSQL("DELETE FROM posicao WHERE snapshotId = 's1'") }
             }

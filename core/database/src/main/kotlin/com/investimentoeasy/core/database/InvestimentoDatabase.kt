@@ -6,12 +6,14 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
-    entities = [SnapshotEntity::class, PosicaoEntity::class, BaseEntity::class],
-    version = 2,
+    entities = [SnapshotEntity::class, PosicaoEntity::class, BaseEntity::class, AnaliseEntity::class],
+    version = 3,
     exportSchema = true,
 )
 internal abstract class InvestimentoDatabase : RoomDatabase() {
     abstract fun snapshotDao(): SnapshotDao
+
+    abstract fun analiseDao(): AnaliseDao
 
     /**
      * R16 no próprio banco: snapshots e posições confirmados não podem ser alterados nem
@@ -47,6 +49,20 @@ internal abstract class InvestimentoDatabase : RoomDatabase() {
                 }
             }
 
-        val MIGRACOES: Array<Migration> = arrayOf(MIGRACAO_1_2)
+        /** v3: análises da Camada 3 guardadas por snapshot. */
+        val MIGRACAO_2_3: Migration =
+            object : Migration(2, 3) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL(
+                        "CREATE TABLE IF NOT EXISTS `analise` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                            "`snapshotId` TEXT NOT NULL, `geradaEm` INTEGER NOT NULL, `modelo` TEXT NOT NULL, " +
+                            "`versaoPrompt` TEXT NOT NULL, `conteudo` TEXT NOT NULL, " +
+                            "FOREIGN KEY(`snapshotId`) REFERENCES `snapshot`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+                    )
+                    db.execSQL("CREATE INDEX IF NOT EXISTS `index_analise_snapshotId` ON `analise` (`snapshotId`)")
+                }
+            }
+
+        val MIGRACOES: Array<Migration> = arrayOf(MIGRACAO_1_2, MIGRACAO_2_3)
     }
 }

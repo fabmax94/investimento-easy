@@ -1,5 +1,7 @@
 package com.investimentoeasy.core.testing
 
+import com.investimentoeasy.core.domain.analise.AnaliseGuardada
+import com.investimentoeasy.core.domain.analise.RepositorioDeAnalises
 import com.investimentoeasy.core.domain.snapshot.SnapshotRepository
 import com.investimentoeasy.core.model.Snapshot
 import com.investimentoeasy.core.model.SnapshotId
@@ -25,4 +27,15 @@ public class FakeSnapshotRepository(
         check(id in snapshots) { "Snapshot $id não existe" }
         baseId = id
     }
+}
+
+public class FakeRepositorioDeAnalises : RepositorioDeAnalises {
+    public val salvas: MutableList<AnaliseGuardada> = mutableListOf()
+
+    override suspend fun salvar(analise: AnaliseGuardada) {
+        salvas += analise
+    }
+
+    override suspend fun ultima(snapshotId: SnapshotId): AnaliseGuardada? =
+        salvas.filter { it.snapshotId == snapshotId }.maxByOrNull { it.geradaEm }
 }

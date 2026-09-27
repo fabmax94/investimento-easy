@@ -70,3 +70,18 @@ internal data class BaseEntity(
         const val UNICA = 1
     }
 }
+
+/** Análise da Camada 3 (JSON validado), várias por snapshot; a tela mostra a mais recente. */
+@Entity(
+    tableName = "analise",
+    foreignKeys = [ForeignKey(entity = SnapshotEntity::class, parentColumns = ["id"], childColumns = ["snapshotId"])],
+    indices = [Index("snapshotId")],
+)
+internal data class AnaliseEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val snapshotId: String,
+    val geradaEm: Long,
+    val modelo: String,
+    val versaoPrompt: String,
+    val conteudo: String,
+)
