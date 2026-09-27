@@ -49,6 +49,7 @@ fun EnviarCarteiraScreen(
     aoRevisar: () -> Unit,
     aoVoltar: () -> Unit,
     modifier: Modifier = Modifier,
+    aoConferirPlanilha: () -> Unit = {},
 ) {
     Column(
         modifier =
@@ -68,6 +69,13 @@ fun EnviarCarteiraScreen(
 
         when (val leitura = estado.leitura) {
             is Leitura.Lida -> estado.revisaoUi?.let { ResumoDaLeitura(leitura, it) }
+            is Leitura.PlanilhaLida -> estado.conferencia?.let { ResumoDaPlanilha(leitura, it) }
+            Leitura.PlanilhaSemBase ->
+                CartaoAviso(
+                    Tom.ATENCAO,
+                    "! ENVIE O PDF PRIMEIRO",
+                    "A planilha complementa uma carteira que já existe. Envie e confirme o relatório XPerformance, depois a planilha.",
+                )
             is Leitura.Falhou -> CartaoAviso(Tom.NEGATIVO, "● NÃO FOI POSSÍVEL LER", mensagemDe(leitura.motivo))
             Leitura.Aguardando, Leitura.Lendo -> Unit
         }
@@ -75,10 +83,15 @@ fun EnviarCarteiraScreen(
         CartaoAviso(
             Tom.INFORMATIVO,
             "ⓘ PRIVACIDADE",
-            "Número da conta e nome do assessor não são lidos do arquivo. Nada é enviado para fora do aparelho nesta etapa.",
+            "Número da conta, nome do titular e dados do assessor não são lidos do arquivo. " +
+                "Nada é enviado para fora do aparelho nesta etapa.",
         )
         Spacer(Modifier.weight(1f))
-        BotaoPrimario("Revisar extração", onClick = aoRevisar, habilitado = estado.leitura is Leitura.Lida)
+        if (estado.leitura is Leitura.PlanilhaLida) {
+            BotaoPrimario("Conferir planilha", onClick = aoConferirPlanilha)
+        } else {
+            BotaoPrimario("Revisar extração", onClick = aoRevisar, habilitado = estado.leitura is Leitura.Lida)
+        }
     }
 }
 
@@ -99,7 +112,7 @@ private fun AreaDeArquivo(
         Icon(Icones.arquivo, contentDescription = null, tint = Castanha.cores.iconsMedium, modifier = Modifier.size(40.dp))
         Text("Escolha o relatório", style = Castanha.tipografia.secao, color = Castanha.cores.textIntense)
         Text(
-            "PDF XPerformance da XP · até 20 MB",
+            "PDF XPerformance ou planilha Posição Detalhada (.xlsx) da XP · até 20 MB",
             style = Castanha.tipografia.legenda,
             color = Castanha.cores.textMedium,
             textAlign = TextAlign.Center,
@@ -114,6 +127,41 @@ private fun AreaDeArquivo(
         }
     }
 }
+
+@Composable
+private fun ResumoDaPlanilha(
+    leitura: Leitura.PlanilhaLida,
+    conferencia: ConferenciaPlanilhaUi,
+) {
+    val etapas = etapasDaPlanilha(conferencia)
+    CartaoContorno {
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(leitura.nomeArquivo, style = Castanha.tipografia.corpoForte, color = Castanha.cores.textIntense)
+                Text(tamanho(leitura.tamanhoBytes), style = Castanha.tipografia.legenda, color = Castanha.cores.textMedium)
+            }
+            if (etapas.all { it.ok }) Etiqueta("Pronto", Tom.POSITIVO) else Etiqueta("Conferir", Tom.ATENCAO)
+        }
+        HorizontalDivider(color = Castanha.cores.borderSemiSoft, modifier = Modifier.padding(vertical = 6.dp))
+        etapas.forEach { EtapaLinha(it) }
+    }
+}
+
+/** Etapas da leitura da planilha, no mesmo formato das do PDF. */
+fun etapasDaPlanilha(conferencia: ConferenciaPlanilhaUi): List<Etapa> =
+    listOf(
+        Etapa("Formato identificado: Posição Detalhada (XP)", "Leitura por parser dedicado, sem IA", ok = true),
+        Etapa(
+            "${conferencia.casadas.size} posições casadas com a base",
+            "Base de ${Formatacao.data(conferencia.dataBase)}",
+            ok = conferencia.podeGuardar,
+        ),
+        Etapa(
+            "Planilha de ${Formatacao.data(conferencia.dataPlanilha)}",
+            if (conferencia.planilhaMaisAntiga) "Anterior à base: confira as quantidades" else "Mesma data ou posterior à base",
+            ok = !conferencia.planilhaMaisAntiga,
+        ),
+    )
 
 @Composable
 private fun ResumoDaLeitura(
@@ -201,7 +249,9 @@ private fun EtapaLinha(etapa: Etapa) {
 
 fun mensagemDe(motivo: MotivoFalha): String =
     when (motivo) {
-        MotivoFalha.FORMATO_NAO_SUPORTADO -> "Por enquanto o app lê só o PDF XPerformance da XP. A planilha .xlsx chega em breve."
+        MotivoFalha.FORMATO_NAO_SUPORTADO -> "O app lê o PDF XPerformance e a planilha Posição Detalhada (.xlsx) da XP."
+        MotivoFalha.PLANILHA_NAO_RECONHECIDA ->
+            "Esta planilha não é a Posição Detalhada da XP. Exporte pelo site da XP em Carteira › Posição detalhada."
         MotivoFalha.RELATORIO_NAO_RECONHECIDO ->
             "Este PDF não é um relatório XPerformance. Outros formatos serão lidos com ajuda de IA numa próxima versão."
         MotivoFalha.PDF_PROTEGIDO -> "O PDF está protegido por senha. Exporte o relatório sem senha e tente de novo."

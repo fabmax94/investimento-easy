@@ -2,6 +2,11 @@ package com.investimentoeasy.core.importacao
 
 import com.investimentoeasy.core.domain.snapshot.PrepararRevisao
 import com.investimentoeasy.core.domain.snapshot.Revisao
+import com.investimentoeasy.core.model.PlanilhaPosicao
+import com.investimentoeasy.parser.xlsx.PlanilhaIlegivelException
+import com.investimentoeasy.parser.xlsx.PosicaoDetalhadaXpParser
+import com.investimentoeasy.parser.xlsx.ResultadoPlanilha
+import com.investimentoeasy.parser.xlsx.parse
 import com.investimentoeasy.parser.xperformance.ResultadoParse
 import com.investimentoeasy.parser.xperformance.XPerformanceParser
 
@@ -30,8 +35,11 @@ public class ArquivoIlegivelException(
 ) : Exception("Arquivo ilegível", causa)
 
 public enum class MotivoFalha {
-    /** Tipo de arquivo que o app ainda não lê (ex.: .xlsx antes da T1.10). */
+    /** Tipo de arquivo que o app não lê (nem PDF nem .xlsx). */
     FORMATO_NAO_SUPORTADO,
+
+    /** .xlsx legível, mas não é a "Posição Detalhada" da XP. */
+    PLANILHA_NAO_RECONHECIDA,
 
     /** PDF legível, mas não é um relatório XPerformance (extração por IA é a T1.20). */
     RELATORIO_NAO_RECONHECIDO,
@@ -47,6 +55,13 @@ public sealed interface ResultadoImportacao {
         val tamanhoBytes: Int,
         val paginas: Int,
         val revisao: Revisao,
+    ) : ResultadoImportacao
+
+    /** Planilha "Posição Detalhada": não vira snapshot, complementa a base (ver `ComplementarBase`). */
+    public data class PlanilhaLida(
+        val nomeArquivo: String,
+        val tamanhoBytes: Int,
+        val planilha: PlanilhaPosicao,
     ) : ResultadoImportacao
 
     public data class Falha(
@@ -65,6 +80,7 @@ public class ImportarRelatorio(
 ) {
     /** Detalhe interno: novos formatos (xlsx, IA) entram aqui sem mudar quem importa. */
     private val parser = XPerformanceParser()
+    private val parserPlanilha = PosicaoDetalhadaXpParser()
 
     public fun importar(arquivo: ArquivoRecebido): ResultadoImportacao {
         val tamanho = arquivo.conteudo.size
@@ -72,7 +88,8 @@ public class ImportarRelatorio(
             when {
                 tamanho == 0 -> MotivoFalha.ARQUIVO_VAZIO
                 tamanho > TAMANHO_MAXIMO_BYTES -> MotivoFalha.ARQUIVO_GRANDE_DEMAIS
-                !ehPdf(arquivo) -> MotivoFalha.FORMATO_NAO_SUPORTADO
+                comeca(arquivo, ASSINATURA_ZIP) -> return importarPlanilha(arquivo)
+                !comeca(arquivo, ASSINATURA_PDF) -> MotivoFalha.FORMATO_NAO_SUPORTADO
                 else -> null
             }
         if (falha != null) return ResultadoImportacao.Falha(falha)
@@ -101,15 +118,26 @@ public class ImportarRelatorio(
             Result.failure(e)
         }
 
-    /** Pelo conteúdo (assinatura `%PDF`), não só pela extensão ou pelo MIME informado. */
-    private fun ehPdf(arquivo: ArquivoRecebido): Boolean {
-        val assinatura = arquivo.conteudo.take(ASSINATURA_PDF.size).toByteArray()
-        return assinatura.contentEquals(ASSINATURA_PDF)
-    }
+    private fun importarPlanilha(arquivo: ArquivoRecebido): ResultadoImportacao =
+        try {
+            when (val resultado = parserPlanilha.parse(arquivo.conteudo)) {
+                ResultadoPlanilha.FormatoNaoReconhecido -> ResultadoImportacao.Falha(MotivoFalha.PLANILHA_NAO_RECONHECIDA)
+                is ResultadoPlanilha.Sucesso -> ResultadoImportacao.PlanilhaLida(arquivo.nome, arquivo.conteudo.size, resultado.planilha)
+            }
+        } catch (_: PlanilhaIlegivelException) {
+            ResultadoImportacao.Falha(MotivoFalha.ARQUIVO_ILEGIVEL)
+        }
+
+    /** Pelo conteúdo (assinatura `%PDF` ou do zip do .xlsx), não pela extensão nem pelo MIME informado. */
+    private fun comeca(
+        arquivo: ArquivoRecebido,
+        assinatura: ByteArray,
+    ): Boolean = arquivo.conteudo.take(assinatura.size).toByteArray().contentEquals(assinatura)
 
     public companion object {
         /** Limite do protótipo: "até 20 MB". */
         public const val TAMANHO_MAXIMO_BYTES: Int = 20 * 1024 * 1024
         private val ASSINATURA_PDF = "%PDF".toByteArray(Charsets.US_ASCII)
+        private val ASSINATURA_ZIP = byteArrayOf(0x50, 0x4B, 0x03, 0x04)
     }
 }

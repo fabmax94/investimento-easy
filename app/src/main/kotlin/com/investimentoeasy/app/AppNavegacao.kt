@@ -103,6 +103,7 @@ fun mensagemDe(conclusao: Conclusao): String =
         Conclusao.NOVA_BASE -> "Carteira atualizada: este upload é a nova base."
         Conclusao.HISTORICO -> "Upload guardado no histórico: a data é anterior à base atual."
         Conclusao.MANTIDA_BASE_ATUAL -> "Nada mudou: a base atual foi mantida."
+        Conclusao.PLANILHA_GUARDADA -> "Dados da planilha guardados junto da base atual."
     }
 
 private fun NavHostController.irPara(aba: Aba) {

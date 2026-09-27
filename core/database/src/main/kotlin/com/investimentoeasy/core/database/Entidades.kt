@@ -85,3 +85,17 @@ internal data class AnaliseEntity(
     val versaoPrompt: String,
     val conteudo: String,
 )
+
+/** Dados da planilha "Posição Detalhada" guardados ao lado de um snapshot (R16: o snapshot não muda). */
+@Entity(
+    tableName = "complemento",
+    foreignKeys = [ForeignKey(entity = SnapshotEntity::class, parentColumns = ["id"], childColumns = ["snapshotId"])],
+    indices = [Index("snapshotId")],
+)
+internal data class ComplementoEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val snapshotId: String,
+    val dataPlanilha: String?,
+    val recebidoEm: Long,
+    val conteudo: String,
+)

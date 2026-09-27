@@ -37,9 +37,13 @@ class AppNavegacaoTest {
     @Before
     fun injetar() = hilt.inject()
 
+    /** A carteira vem do Room num dispatcher de IO de verdade: espera a leitura terminar. */
+    private fun esperarCarteiraVazia() =
+        compose.waitUntil(TEMPO_MAXIMO_MS) { compose.onAllNodesWithText("Nenhuma carteira ainda").fetchSemanticsNodes().isNotEmpty() }
+
     @Test
     fun abre_na_carteira_vazia_com_a_barra_inferior() {
-        compose.onNodeWithText("Nenhuma carteira ainda").assertExists()
+        esperarCarteiraVazia()
         compose.onNodeWithTag("aba_CARTEIRA").assertIsSelected()
         compose.onRoot().captureRoboImage("src/test/screenshots/app_inicio.png")
     }
@@ -71,3 +75,5 @@ class AppNavegacaoTest {
         mensagemDe(Conclusao.MANTIDA_BASE_ATUAL) shouldBe "Nada mudou: a base atual foi mantida."
     }
 }
+
+private const val TEMPO_MAXIMO_MS = 5_000L

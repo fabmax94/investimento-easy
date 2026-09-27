@@ -2,10 +2,12 @@ package com.investimentoeasy.feature.upload
 
 import android.net.Uri
 import com.investimentoeasy.core.documentos.LeitorDeArquivo
+import com.investimentoeasy.core.domain.complemento.ComplementarBase
 import com.investimentoeasy.core.domain.snapshot.ConfirmarSnapshot
 import com.investimentoeasy.core.domain.snapshot.DecisaoMesmaData
 import com.investimentoeasy.core.importacao.ArquivoRecebido
 import com.investimentoeasy.core.importacao.MotivoFalha
+import com.investimentoeasy.core.testing.FakeRepositorioDeComplementos
 import com.investimentoeasy.core.testing.FakeSnapshotRepository
 import com.investimentoeasy.core.testing.relogioFixo
 import com.investimentoeasy.core.testing.snapshotConfirmado
@@ -44,10 +46,18 @@ class ImportacaoViewModelTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
+    private val complementos = FakeRepositorioDeComplementos()
+
     private fun viewModel(
         paginas: List<String> = FixturesXPerformance.sintetico(),
         repo: FakeSnapshotRepository = repositorio,
-    ) = ImportacaoViewModel(leitor, Cenarios.importar(paginas), ConfirmarSnapshot(repo, relogioFixo()), dispatcher)
+    ) = ImportacaoViewModel(
+        leitor,
+        Cenarios.importar(paginas),
+        ConfirmarSnapshot(repo, relogioFixo()),
+        ComplementarBase(repo, complementos, relogioFixo()),
+        dispatcher,
+    )
 
     @Test
     fun `arquivo lido vira revisao`() {
@@ -155,4 +165,38 @@ class ImportacaoViewModelTest {
         vm.estado.value shouldBe EstadoImportacao()
         vm.estado.value.leitura.shouldBeInstanceOf<Leitura.Aguardando>()
     }
+
+    @Test
+    fun `planilha sem base pede o PDF primeiro`() {
+        every { leitor.ler(uri) } returns ArquivoRecebido("PosicaoDetalhada.xlsx", null, Cenarios.planilha)
+        val vm = viewModel()
+        vm.arquivoEscolhido(uri)
+        vm.estado.value.leitura shouldBe Leitura.PlanilhaSemBase
+        vm.estado.value.conferencia.shouldBeNull()
+    }
+
+    @Test
+    fun `planilha casa com a base e so e guardada quando o usuario pede`() =
+        runTest {
+            val base = Cenarios.base()
+            val repo = FakeSnapshotRepository(listOf(base), base.id)
+            every { leitor.ler(uri) } returns ArquivoRecebido("PosicaoDetalhada.xlsx", null, Cenarios.planilha)
+            val vm = viewModel(repo = repo)
+            vm.arquivoEscolhido(uri)
+
+            vm.estado.value.leitura shouldBe Leitura.PlanilhaLida("PosicaoDetalhada.xlsx", Cenarios.planilha.size)
+            val conferencia = vm.estado.value.conferencia!!
+            conferencia.casadas shouldHaveSize 11
+            conferencia.planilhaMaisAntiga shouldBe true
+            complementos.salvos shouldHaveSize 0
+
+            vm.guardarPlanilha()
+            complementos.salvos shouldHaveSize 1
+            complementos.salvos.single().snapshotId shouldBe base.id
+            vm.estado.value.conclusao shouldBe Conclusao.PLANILHA_GUARDADA
+
+            vm.conclusaoTratada()
+            vm.guardarPlanilha()
+            complementos.salvos shouldHaveSize 1
+        }
 }

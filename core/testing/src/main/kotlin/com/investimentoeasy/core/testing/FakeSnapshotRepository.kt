@@ -2,6 +2,8 @@ package com.investimentoeasy.core.testing
 
 import com.investimentoeasy.core.domain.analise.AnaliseGuardada
 import com.investimentoeasy.core.domain.analise.RepositorioDeAnalises
+import com.investimentoeasy.core.domain.complemento.ComplementoPlanilha
+import com.investimentoeasy.core.domain.complemento.RepositorioDeComplementos
 import com.investimentoeasy.core.domain.snapshot.SnapshotRepository
 import com.investimentoeasy.core.model.Snapshot
 import com.investimentoeasy.core.model.SnapshotId
@@ -38,4 +40,14 @@ public class FakeRepositorioDeAnalises : RepositorioDeAnalises {
 
     override suspend fun ultima(snapshotId: SnapshotId): AnaliseGuardada? =
         salvas.filter { it.snapshotId == snapshotId }.maxByOrNull { it.geradaEm }
+}
+
+public class FakeRepositorioDeComplementos : RepositorioDeComplementos {
+    public val salvos: MutableList<ComplementoPlanilha> = mutableListOf()
+
+    override suspend fun salvar(complemento: ComplementoPlanilha) {
+        salvos += complemento
+    }
+
+    override suspend fun ultimo(snapshotId: SnapshotId): ComplementoPlanilha? = salvos.lastOrNull { it.snapshotId == snapshotId }
 }

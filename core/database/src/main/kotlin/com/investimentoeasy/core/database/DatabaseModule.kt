@@ -3,6 +3,7 @@ package com.investimentoeasy.core.database
 import android.content.Context
 import androidx.room.Room
 import com.investimentoeasy.core.domain.analise.RepositorioDeAnalises
+import com.investimentoeasy.core.domain.complemento.RepositorioDeComplementos
 import com.investimentoeasy.core.domain.snapshot.SnapshotRepository
 import dagger.Binds
 import dagger.Module
@@ -23,7 +24,7 @@ internal object DatabaseModule {
         Room
             .databaseBuilder(context, InvestimentoDatabase::class.java, InvestimentoDatabase.NOME)
             .addCallback(InvestimentoDatabase.Imutabilidade)
-            .addMigrations(InvestimentoDatabase.MIGRACAO_1_2, InvestimentoDatabase.MIGRACAO_2_3)
+            .addMigrations(InvestimentoDatabase.MIGRACAO_1_2, InvestimentoDatabase.MIGRACAO_2_3, InvestimentoDatabase.MIGRACAO_3_4)
             .build()
 
     @Provides
@@ -31,6 +32,9 @@ internal object DatabaseModule {
 
     @Provides
     fun analiseDao(db: InvestimentoDatabase): AnaliseDao = db.analiseDao()
+
+    @Provides
+    fun complementoDao(db: InvestimentoDatabase): ComplementoDao = db.complementoDao()
 }
 
 @Module
@@ -41,4 +45,7 @@ internal interface RepositoryModule {
 
     @Binds
     fun repositorioDeAnalises(impl: RoomRepositorioDeAnalises): RepositorioDeAnalises
+
+    @Binds
+    fun repositorioDeComplementos(impl: RoomRepositorioDeComplementos): RepositorioDeComplementos
 }

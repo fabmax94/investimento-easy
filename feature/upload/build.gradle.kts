@@ -9,6 +9,7 @@ android {
 dependencies {
     implementation(projects.core.documentos)
     testImplementation(testFixtures(projects.parser.xperformance))
+    testImplementation(testFixtures(projects.parser.xlsx))
 }
 
 roborazzi {

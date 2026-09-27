@@ -2,6 +2,8 @@ package com.investimentoeasy.core.importacao
 
 import com.investimentoeasy.core.domain.validacao.Problema
 import com.investimentoeasy.core.model.Money
+import com.investimentoeasy.parser.xlsx.EscritorXlsx
+import com.investimentoeasy.parser.xlsx.FixturesPlanilhaXp
 import com.investimentoeasy.parser.xperformance.FixturesXPerformance
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -33,10 +35,27 @@ class ImportarRelatorioTest {
     }
 
     @Test
-    fun `arquivo que nao e PDF pelo conteudo e recusado sem tentar extrair`() {
+    fun `arquivo que nao e PDF nem xlsx pelo conteudo e recusado sem tentar extrair`() {
         val extratorQueNaoPodeSerChamado = ExtratorDeTextoPdf { error("não deveria extrair") }
-        importar(extratorQueNaoPodeSerChamado, "PK\u0003\u0004 planilha".toByteArray()) shouldBe
+        importar(extratorQueNaoPodeSerChamado, "GIF89a imagem".toByteArray()) shouldBe
             ResultadoImportacao.Falha(MotivoFalha.FORMATO_NAO_SUPORTADO)
+    }
+
+    @Test
+    fun `planilha Posicao Detalhada e lida sem passar pelo extrator de PDF`() {
+        val extratorQueNaoPodeSerChamado = ExtratorDeTextoPdf { error("não deveria extrair") }
+        val bytes = FixturesPlanilhaXp.bytes()
+        val lida = importar(extratorQueNaoPodeSerChamado, bytes).shouldBeInstanceOf<ResultadoImportacao.PlanilhaLida>()
+        lida.tamanhoBytes shouldBe bytes.size
+        lida.planilha.dataPosicao shouldBe LocalDate.of(2026, 6, 21)
+        lida.planilha.itens.size shouldBe 12
+    }
+
+    @Test
+    fun `outra planilha ou zip corrompido viram falhas explicitas`() {
+        val outra = EscritorXlsx.gerar(listOf(listOf("Ativo", "Valor")))
+        importar(conteudo = outra) shouldBe ResultadoImportacao.Falha(MotivoFalha.PLANILHA_NAO_RECONHECIDA)
+        importar(conteudo = "PK\u0003\u0004 quebrado".toByteArray()) shouldBe ResultadoImportacao.Falha(MotivoFalha.ARQUIVO_ILEGIVEL)
     }
 
     @Test

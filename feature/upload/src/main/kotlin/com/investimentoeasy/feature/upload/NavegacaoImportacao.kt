@@ -25,8 +25,11 @@ internal data object RotaEnviar
 @Serializable
 internal data object RotaRevisar
 
+@Serializable
+internal data object RotaConferirPlanilha
+
 /**
- * Grafo Enviar → Revisar. As duas telas compartilham o [ImportacaoViewModel] do grafo.
+ * Grafo Enviar → Revisar (PDF) ou Enviar → Conferir planilha (.xlsx). As duas telas compartilham o [ImportacaoViewModel] do grafo.
  * [aoConcluir] recebe como a confirmação terminou; a navegação de volta é de quem chama.
  */
 fun NavGraphBuilder.importacao(
@@ -44,20 +47,16 @@ fun NavGraphBuilder.importacao(
                 }
             EnviarCarteiraScreen(
                 estado = estado,
-                aoEscolherArquivo = { seletor.launch(arrayOf(MIME_PDF)) },
+                aoEscolherArquivo = { seletor.launch(arrayOf(MIME_PDF, MIME_XLSX)) },
                 aoRevisar = { navController.navigate(RotaRevisar) },
                 aoVoltar = aoSair,
+                aoConferirPlanilha = { navController.navigate(RotaConferirPlanilha) },
             )
         }
         composable<RotaRevisar> { entrada ->
             val viewModel = viewModelDoGrafo(navController, entrada)
             val estado by viewModel.estado.collectAsStateWithLifecycle()
-            LaunchedEffect(estado.conclusao) {
-                estado.conclusao?.let { conclusao ->
-                    aoConcluir(conclusao)
-                    viewModel.conclusaoTratada()
-                }
-            }
+            ConclusaoTratada(estado.conclusao, aoConcluir, viewModel::conclusaoTratada)
             estado.revisaoUi?.let { revisao ->
                 RevisarExtracaoScreen(
                     revisao = revisao,
@@ -70,6 +69,33 @@ fun NavGraphBuilder.importacao(
                     aoVoltar = { navController.popBackStack() },
                 )
             }
+        }
+        composable<RotaConferirPlanilha> { entrada ->
+            val viewModel = viewModelDoGrafo(navController, entrada)
+            val estado by viewModel.estado.collectAsStateWithLifecycle()
+            ConclusaoTratada(estado.conclusao, aoConcluir, viewModel::conclusaoTratada)
+            estado.conferencia?.let { conferencia ->
+                ConferirPlanilhaScreen(
+                    conferencia = conferencia,
+                    guardando = estado.confirmando,
+                    aoGuardar = viewModel::guardarPlanilha,
+                    aoVoltar = { navController.popBackStack() },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ConclusaoTratada(
+    conclusao: Conclusao?,
+    aoConcluir: (Conclusao) -> Unit,
+    aoTratar: () -> Unit,
+) {
+    LaunchedEffect(conclusao) {
+        conclusao?.let {
+            aoConcluir(it)
+            aoTratar()
         }
     }
 }
@@ -84,3 +110,4 @@ private fun viewModelDoGrafo(
 }
 
 private const val MIME_PDF = "application/pdf"
+private const val MIME_XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
