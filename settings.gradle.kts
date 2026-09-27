@@ -1,6 +1,7 @@
 pluginManagement {
     includeBuild("build-logic")
     repositories {
+        google()
         mavenCentral()
         gradlePluginPortal()
     }
@@ -9,6 +10,7 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        google()
         mavenCentral()
     }
 }
@@ -23,5 +25,5 @@ include(":core:domain")
 include(":core:testing")
 include(":parser:xperformance")
 
-// Módulos Android (:app, :core:designsystem, :feature:*) entram quando o
-// repositório Google Maven estiver acessível no ambiente de build (ver T0.4).
+// Módulos Android.
+include(":core:designsystem")

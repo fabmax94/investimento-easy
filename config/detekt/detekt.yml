@@ -3,11 +3,16 @@ naming:
   FunctionNaming:
     # Testes usam nomes descritivos em crases, prefixados pela regra (ex.: `R3 ...`).
     excludes: ['**/test/**']
+    # Convenção do Compose: funções @Composable em PascalCase.
+    ignoreAnnotated: ['Composable']
   MatchingDeclarationName:
     active: false
 style:
   MagicNumber:
     excludes: ['**/test/**', '**/testing/**']
+    # Medidas de layout (16.dp, 12.sp) são o próprio design, não números mágicos.
+    ignoreAnnotated: ['Composable', 'Preview']
+    ignorePropertyDeclaration: true
   MaxLineLength:
     maxLineLength: 140
     excludes: ['**/test/**']
@@ -17,5 +22,9 @@ style:
 complexity:
   LongMethod:
     excludes: ['**/test/**']
+    ignoreAnnotated: ['Composable']
+  LongParameterList:
+    ignoreDefaultParameters: true
+    ignoreAnnotated: ['Composable']
   TooManyFunctions:
     excludes: ['**/test/**']
