@@ -1,0 +1,21 @@
+# Sobrescreve apenas o necessário; o restante vem da config padrão do detekt.
+naming:
+  FunctionNaming:
+    # Testes usam nomes descritivos em crases, prefixados pela regra (ex.: `R3 ...`).
+    excludes: ['**/test/**']
+  MatchingDeclarationName:
+    active: false
+style:
+  MagicNumber:
+    excludes: ['**/test/**', '**/testing/**']
+  MaxLineLength:
+    maxLineLength: 140
+    excludes: ['**/test/**']
+  ReturnCount:
+    max: 3
+    excludeGuardClauses: true
+complexity:
+  LongMethod:
+    excludes: ['**/test/**']
+  TooManyFunctions:
+    excludes: ['**/test/**']
