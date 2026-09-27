@@ -40,6 +40,7 @@ mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 pdfbox = { module = "org.apache.pdfbox:pdfbox", version.ref = "pdfbox" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 anthropic-java = { module = "com.anthropic:anthropic-java", version.ref = "anthropic" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 okhttp-mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okhttp" }
 
 # Android

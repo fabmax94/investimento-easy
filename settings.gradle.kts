@@ -27,6 +27,7 @@ include(":parser:xperformance")
 include(":parser:xlsx")
 include(":core:importacao")
 include(":core:ai")
+include(":core:mercado")
 
 // Módulos Android.
 include(":app")
