@@ -5,7 +5,7 @@ plugins {
 
 dependencies {
     api(projects.core.domain)
-    implementation(libs.okhttp)
+    api(libs.okhttp)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.core)
     testImplementation(projects.core.testing)
