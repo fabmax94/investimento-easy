@@ -3,6 +3,8 @@ package com.investimentoeasy.core.domain.analise
 import com.investimentoeasy.core.domain.alocacao.FatiaAlocacao
 import com.investimentoeasy.core.domain.alocacao.GrupoAlocacao
 import com.investimentoeasy.core.domain.alocacao.alocacaoPorGrupo
+import com.investimentoeasy.core.domain.mercado.LeituraDeCambio
+import com.investimentoeasy.core.domain.mercado.LeituraDeJuros
 import com.investimentoeasy.core.domain.validacao.ValidadorExtracao
 import com.investimentoeasy.core.model.ClasseAtivo
 import com.investimentoeasy.core.model.IndiceReferencia
@@ -89,7 +91,11 @@ public data class AnaliseDeterministica(
 public class AnalisarCarteira(
     private val limites: LimitesAnalise = LimitesAnalise(),
 ) {
-    public operator fun invoke(snapshot: Snapshot): AnaliseDeterministica {
+    public operator fun invoke(
+        snapshot: Snapshot,
+        juros: LeituraDeJuros? = null,
+        cambio: LeituraDeCambio? = null,
+    ): AnaliseDeterministica {
         val posicoes = snapshot.posicoes
         val total = posicoes.map { it.saldo.valor }.soma()
         val foraDoRitmo = ValidadorExtracao().validar(posicoes, null, true).chavesForaDoRitmo
@@ -108,7 +114,7 @@ public class AnalisarCarteira(
                                 snapshot.dataReferencia,
                             )
                         },
-                    cenario = cenario(p.ativo),
+                    cenario = cenario(p.ativo, juros, cambio),
                     dadoAConferir = conferir,
                 )
             }
