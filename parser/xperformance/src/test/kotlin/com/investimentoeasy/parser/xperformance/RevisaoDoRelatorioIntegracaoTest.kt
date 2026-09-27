@@ -18,7 +18,7 @@ import java.math.RoundingMode
 class RevisaoDoRelatorioIntegracaoTest {
     private val revisao =
         PrepararRevisao()(
-            XPerformanceParser().parse(Fixtures.sintetico()).shouldBeInstanceOf<ResultadoParse.Sucesso>().extracao,
+            XPerformanceParser().parse(FixturesXPerformance.sintetico()).shouldBeInstanceOf<ResultadoParse.Sucesso>().extracao,
         )
 
     @Test

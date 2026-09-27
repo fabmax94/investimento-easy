@@ -24,7 +24,7 @@ import java.time.YearMonth
 class XPerformanceParserTest {
     private val parser = XPerformanceParser()
 
-    private fun extrair(paginas: List<String> = Fixtures.sintetico()): ExtracaoCarteira =
+    private fun extrair(paginas: List<String> = FixturesXPerformance.sintetico()): ExtracaoCarteira =
         parser.parse(paginas).shouldBeInstanceOf<ResultadoParse.Sucesso>().extracao
 
     @Test
@@ -154,7 +154,7 @@ class XPerformanceParserTest {
 
     @Test
     fun `movimentacoes presentes mas em formato desconhecido nao sao descartadas em silencio`() {
-        val paginas = Fixtures.sintetico().toMutableList()
+        val paginas = FixturesXPerformance.sintetico().toMutableList()
         paginas[8] = paginas[8].replace("Não existem movimentações no mês referência selecionado.", "05/09/2026 Aporte R$ 1.000,00")
         val extracao = extrair(paginas)
         extracao.movimentacoes.shouldBeInstanceOf<Movimentacoes.NaoInterpretadas>().quantidadeLinhas shouldBe 1
@@ -163,19 +163,19 @@ class XPerformanceParserTest {
 
     @Test
     fun `sem secao de movimentacoes o dado fica como nao informado`() {
-        extrair(Fixtures.sintetico().take(8)).movimentacoes shouldBe Movimentacoes.NaoInformadas
+        extrair(FixturesXPerformance.sintetico().take(8)).movimentacoes shouldBe Movimentacoes.NaoInformadas
     }
 
     @Test
     fun `linha logo apos uma posicao e tratada como continuacao do nome`() {
-        val paginas = Fixtures.sintetico().toMutableList()
+        val paginas = FixturesXPerformance.sintetico().toMutableList()
         paginas[7] = paginas[7].replace("Legenda", "RL\nLegenda")
         extrair(paginas).posicoes.last().nome shouldBe "XYZW11 RL"
     }
 
     @Test
     fun `linha desconhecida fora de continuacao vira aviso, nao e ignorada`() {
-        val paginas = Fixtures.sintetico().toMutableList()
+        val paginas = FixturesXPerformance.sintetico().toMutableList()
         paginas[7] = paginas[7].replace("XYZW11", "linha solta\nXYZW11")
         val extracao = extrair(paginas)
         extracao.avisos.map { it.codigo } shouldContainExactly listOf(CodigoAviso.LINHA_NAO_INTERPRETADA)
@@ -185,14 +185,14 @@ class XPerformanceParserTest {
 
     @Test
     fun `subtotal de estrategia divergente gera aviso`() {
-        val paginas = Fixtures.sintetico().toMutableList()
+        val paginas = FixturesXPerformance.sintetico().toMutableList()
         paginas[5] = paginas[5].replace("ITSA4 R\$ 5.000,00", "ITSA4 R\$ 5.000,01")
         extrair(paginas).avisos.map { it.codigo } shouldContainExactly listOf(CodigoAviso.SUBTOTAL_ESTRATEGIA_DIVERGENTE)
     }
 
     @Test
     fun `estrategia desconhecida gera aviso mas e lida`() {
-        val paginas = Fixtures.sintetico().toMutableList()
+        val paginas = FixturesXPerformance.sintetico().toMutableList()
         paginas[7] = paginas[7].replace("XYZW11 R", "Cripto R\$ 0,00 - 0,00% - - - - - -\nXYZW11 R")
         val extracao = extrair(paginas)
         extracao.estrategias.map { it.nome } shouldContainExactly
@@ -207,7 +207,7 @@ class XPerformanceParserTest {
 
     @Test
     fun `sem posicao detalhada usa a composicao por estrategia`() {
-        val semPosicoes = Fixtures.sintetico().filterIndexed { i, _ -> i !in 4..7 }
+        val semPosicoes = FixturesXPerformance.sintetico().filterIndexed { i, _ -> i !in 4..7 }
         val extracao = extrair(semPosicoes)
         extracao.posicoes.shouldBeEmpty()
         extracao.estrategias.map { it.nome to it.percentualAlocacao } shouldContainExactly
@@ -224,7 +224,7 @@ class XPerformanceParserTest {
 
     @Test
     fun `sem resumo o patrimonio fica ausente e ha aviso`() {
-        val paginas = Fixtures.sintetico().toMutableList()
+        val paginas = FixturesXPerformance.sintetico().toMutableList()
         paginas[0] = paginas[0].replace("PATRIMÔNIO TOTAL BRUTO", "OUTRO TITULO")
         val extracao = extrair(paginas)
         extracao.resumo.shouldBeNull()
