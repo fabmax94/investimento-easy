@@ -1,0 +1,15 @@
+XPerformance - Relatório de Investimentos Data de referência: 03/09/2026 05
+P O S I Ç Ã O  D E T A L H A D A
+PRECIFICAÇÃO DE RENDA FIXA:  A MERCADO
+P O S I Ç Ã O  D E T A L H A D A  D O S  AT I V O S
+M Ê S  A T U A L A N O 2 4  M E S E S
+Estratégias Saldo Bruto Qtd. %Aloc. Rent. %CDI Rent. %CDI Rent. %CDI
+Pós Fixado R$ 20.000,00 - 13,33% 1,00% 625,00% 9,00% 94,74% 26,00% 91,19%
+CDB BANCO EXEMPLO S.A. - MAR/2028 - R$ 10.000,00 10 6,67% 0,17% 106,25% 10,80% 113,68% 30,00% 105,22%
+112,00% CDI
+Fundo Exemplo Debêntures Incentivadas FIC FIF-Infra R$ 8.000,00 1234.56 5,33% 0,25% 156,25% 8,00% 84,21% 28,00% 98,21%
+RF RL
+LFTB11 R$ 2.000,00 21 1,33% 34,36% 22.160,52% 37,78% 1.316,19% 38,15% 1.231,66%
+Inflação R$ 5.000,00 - 3,33% -0,50% -312,50% 3,84% 40,42% 19,84% 69,59%
+IMAB11 R$ 5.000,00 45 3,33% -0,50% -312,50% 3,84% 40,42% 19,84% 69,59%
+Renda Variável Brasil R$ 15.000,00 - 10,00% 4,00% 2.500,00% 12,00% 126,32% 18,00% 63,13%

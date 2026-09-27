@@ -1,0 +1,12 @@
+E S T R AT É G I A :  C O M P O S I Ç Ã O
+C O M P O S I Ç Ã O
+Estratégias Saldo Bruto Mês Atual Ano 12 M 24 M
+Pós Fixado (13,33%) R$ 20.000,00 1,00% 9,00% 12,00% 26,00%
+100,00% Inflação (3,33%) R$ 5.000,00 -0,50% 3,84% 5,60% 19,84%
+Total investido Renda Variável Brasil (10,00%) R$ 15.000,00 4,00% 12,00% 20,00% 18,00%
+Alternativo (13,33%) R$ 20.000,00 1,17% 6,79% 21,80% 65,77%
+Renda Variável Global (33,33%) R$ 50.000,00 0,70% 20,00% 25,00% 60,00%
+Fundos Listados (26,67%) R$ 40.000,00 0,20% 1,00% 5,00% 9,00%
+Caixa (0,00%) R$ 0,00 - - - -
+O gráfico de histórico por estratégia não contempla ativos de ”opções”, ”derivativos”, ”futuros (BMF)”, ”termos” e ”ouro”. 04
+XPerformance - Relatório de Investimentos Data de referência: 03/09/2026
