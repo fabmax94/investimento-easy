@@ -5,7 +5,36 @@
 
 ---
 
-## 1. Decisões de arquitetura (propostas)
+## 0. Andamento
+
+| Task | Status | Onde |
+|---|---|---|
+| T0.1 Setup do repositório (Gradle, version catalog, build-logic) | ✅ parcial: módulos JVM | `settings.gradle.kts`, `build-logic/` |
+| T0.2 Qualidade (ktlint, detekt, Kover agregado ≥ 85%) | ✅ | `config/detekt/`, `.editorconfig` |
+| T0.3 CI GitHub Actions + template de PR | ✅ | `.github/` |
+| T0.4 Setup do Android SDK | ⛔ bloqueado: rede do ambiente nega `dl.google.com` (Google Maven) | — |
+| T0.5 `core:testing` (relógio fixo, fakes, builders) | ✅ | `core/testing/` |
+| T0.7 ADRs | ✅ | `docs/adr/` |
+| T1.1 `core:model` | ✅ | `core/model/` |
+| T1.2 Classificação R4/R5 | ✅ | `core/domain/.../classificacao/` |
+| T1.3 Validações R1, R3, R6 (R7 no parser) | ✅ | `core/domain/.../validacao/` |
+| T1.6 `PrepararRevisao` + `ConfirmarSnapshot` R8/R15/R16 | ✅ (domínio; persistência Room na T1.4) | `core/domain/.../snapshot/` |
+| T1.7 Fixtures | ✅ sintéticas (o repositório é público) | `parser/xperformance/src/test/resources/` |
+| T1.9 Parser XPerformance | ✅ validado também contra um relatório real, fora do git | `parser/xperformance/` |
+
+**Aprendizados do relatório real** (incorporados ao código e aos testes):
+- O texto usa espaço não separável (U+00A0) depois de `R$`; o parser normaliza os espaços.
+- A ordem das páginas não é fixa (patrimônio p.1, série mensal p.2, evolução p.3, composição p.4,
+  posições p.6–9, movimentações p.10): as seções são localizadas pelo título, não pela página.
+- A página 3 traz a evolução mensal com movimentações dos últimos 12 meses: base para R17/R19.
+- Fundos vêm **sem CNPJ**: a chave R4 usa o nome normalizado até o CNPJ ser resolvido.
+- Quantidade usa ponto decimal (`6330.53`), dinheiro e percentual usam vírgula.
+- Casos reais para R6: direito de subscrição com quantidade e saldo zero; ETF pós-fixado com
+  rentabilidade mensal de 34%.
+
+---
+
+## 1. Decisões de arquitetura
 
 O documento sugere React Native + backend. Como o pedido é um **app Android**, a proposta é nativa e *local-first* no MVP, mantendo a porta aberta para um backend depois.
 
@@ -25,7 +54,8 @@ O documento sugere React Native + backend. Como o pedido é um **app Android**, 
 | PDF | PdfBox-Android (extração de texto por página) | Parser determinístico do XPerformance (R2) |
 | XLSX | Leitor próprio mínimo (xlsx = zip + XML) ou fastexcel-reader | Apache POI é pesado demais para Android |
 | IA | API do Claude com saída JSON validada por esquema | Camada 3; o Claude nunca calcula |
-| Chave da API | MVP pessoal: chave informada pelo usuário e guardada no Keystore. Multiusuário: proxy no backend | **Depende da pergunta em aberto do doc** (§6) |
+| Chave da API | Chave informada pelo usuário e guardada no Android Keystore | App de uso pessoal (ADR-0002) |
+| Fontes de mercado | Só gratuitas: CVM dados abertos, Tesouro Transparente, BCB SGS; cotação B3 gratuita a definir no spike T2.1 | ADR-0002 |
 
 Princípios transversais que viram código (não só documentação):
 - **Regra zero:** todo valor numérico é um `Sourced<T>` com `origem ∈ {RELATORIO, MERCADO, CALCULADO, ESTIMADO, IA}`; ausência é `null`, nunca interpolação.
@@ -176,7 +206,7 @@ Legenda de tamanho: **P** ≤ 1 dia · **M** 2–3 dias · **G** 4–5 dias. Dep
 
 | # | Task | Tam. | Regras | Critério de aceite |
 |---|---|---|---|---|
-| T2.1 | **Spike:** confirmar fontes — API de cotações B3 (preço, limite, termos), formato atual do informe diário CVM, preços do Tesouro, SGS 12 e 433 do BCB | P | — | ADR-004 com fonte escolhida por classe |
+| T2.1 | **Spike:** confirmar fontes **gratuitas** — cotações B3 (limite, termos, estabilidade), formato atual do informe diário CVM, preços do Tesouro, SGS 12 e 433 do BCB | P | — | ADR-004 com fonte escolhida por classe; sem fonte gratuita confiável a classe fica congelada (R11) |
 | T2.2 | Camada de fontes plugável (`MarketDataSource` por classe) + cache diário + entidade Cotação | M [T2.1] | R11 | Falha de fonte mantém última cotação com data; nunca interpola |
 | T2.3 | Clientes: cotações B3, cota CVM por CNPJ, Tesouro, CDI/IPCA (BCB) | G [T2.2] | — | Testes de contrato com MockWebServer e payloads reais gravados |
 | T2.4 | Motor de remarcação por classe (quantidade congelada × preço; CDI × %; curva IPCA+/pré; congelado) + nível de confiança | G [T2.3] | R9, R10 | Um teste por linha da tabela de classes do documento |
@@ -236,10 +266,19 @@ Primeira entrega útil: **Fase 0 + T1.1 a T1.6** (modelo, regras de validação 
 
 ---
 
-## 6. Pontos a confirmar antes de começar
+## 6. Decisões tomadas
 
-1. **App só para você ou para outros usuários?** (em aberto no documento). Define se a chave do Claude fica no aparelho (MVP pessoal) ou exige backend/proxy, cadastro e cuidados regulatórios da CVM.
-2. **Fixtures reais:** preciso de um PDF XPerformance e um .xlsx de posição (posso anonimizar) para os golden tests dos parsers.
-3. **Fonte de cotações da B3:** aceita uma API paga/com token (ex.: brapi) ou prefere só fontes gratuitas? (Spike T2.1.)
-4. **minSdk:** proposta minSdk 26 (Android 8), targetSdk mais recente.
-5. **Design system "Castanha":** há tokens/Figma disponíveis para o T0.6, ou derivo do protótipo?
+1. **Uso:** só pessoal → local-first, sem backend, chave do Claude no Keystore (ADR-0002).
+2. **Fixtures:** o usuário enviou um PDF XPerformance real. Como o repositório é **público**, ele não é
+   versionado: a fixture é sintética, com o mesmo layout. Relatórios reais ficam em `local-fixtures/`
+   (ignorado pelo git) e são testados por `XPerformanceRelatorioRealTest`. Ainda falta um .xlsx de posição.
+3. **Cotações:** apenas fontes gratuitas.
+4. **minSdk 26**, targetSdk mais recente.
+5. **Design system:** derivar do protótipo (T0.6).
+
+## 7. Bloqueios
+
+- **Google Maven (`dl.google.com`) negado pela política de rede do ambiente de desenvolvimento
+  remoto.** Sem ele não há Android Gradle Plugin, AndroidX nem Compose. Até liberar, o trabalho segue
+  nos módulos Kotlin/JVM (domínio, cálculos, parsers). Para liberar: nas configurações do ambiente,
+  em *Network access*, adicionar `dl.google.com` e `maven.google.com` (ou um nível de acesso mais amplo).
