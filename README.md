@@ -13,10 +13,9 @@ snapshot confiável e, entre um upload e outro, acompanha a carteira com dados p
 | `app` | Activity, navegação (barra inferior do protótipo), Hilt |
 | `feature:upload` | Telas Enviar carteira, Revisar extração (R1, R3, R6, R8, R15) e Conferir planilha |
 | `feature:portfolio` | Tela Carteira (base confirmada e alocação) |
-| `feature:analysis` | Tela Análise: 7 abas, Ritmo/Cenário, alertas e a leitura do Claude |
+| `feature:analysis` | Tela Análise: 7 abas, perfil, dados de mercado, Ritmo/Cenário, alertas e a recomendação gerada no aparelho |
 | `parser:xlsx` | Leitor .xlsx sem POI (zip + XML, sem DTD, com limites) e parser da Posição Detalhada da XP |
-| `core:ai` | Camada 3: entrada sem dado pessoal, chamada ao Claude, validação de cada número citado |
-| `core:seguranca` | Chave da API cifrada (AES-GCM, Android Keystore) |
+| `core:mercado` | Dados públicos gratuitos: Banco Central (Selic, IPCA, dólar), Focus, Yahoo Finance (cotações) e CVM (VP e DY de FIIs) |
 | `core:designsystem` | Tema Castanha (cores geradas do protótipo), tipografia, formatação pt-BR, componentes |
 | `core:ui` | UI compartilhada que conhece o domínio (lista de alocação) |
 | `core:database` | Room; histórico imutável (R16) no DAO e em triggers do SQLite |
@@ -24,7 +23,7 @@ snapshot confiável e, entre um upload e outro, acompanha a carteira com dados p
 | `core:importacao` | Arquivo → texto → parser → revisão, com as falhas previstas |
 | `core:common` | Relógio e dispatchers injetáveis |
 | `core:model` | `Money`, `Percent`, `Sourced`/`Origem`, `ChaveAtivo` (R4), `Snapshot`, `ExtracaoCarteira` |
-| `core:domain` | Classificação (R5), validação (R1, R3, R6), confirmação (R8, R15, R16), alocação, motor de análise (Camadas 1 e 2) |
+| `core:domain` | Classificação (R5), validação (R1, R3, R6), confirmação (R8, R15, R16), alocação, motor de análise (Camadas 1 e 2), perfil, ciclo de juros e motor de recomendação |
 | `core:testing` | Fakes e builders para testes |
 | `parser:xperformance` | Parser determinístico do relatório XPerformance (R2, R7) |
 

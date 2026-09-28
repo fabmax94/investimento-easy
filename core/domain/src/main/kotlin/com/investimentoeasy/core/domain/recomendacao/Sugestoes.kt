@@ -21,7 +21,9 @@ internal fun novosAtivos(ctx: Contexto): List<NovoAtivo> {
     val colchao = colchao(ctx)
     val abaixo =
         desvios(ctx).filter { it.abaixoDoMinimo }.sortedByDescending { it.falta }.mapNotNull { d ->
-            val valor = ctx.valorDePontos(d.falta).takeIf { it >= VALOR_MINIMO } ?: return@mapNotNull null
+            // O colchão já é renda fixa pós-fixada: só sugere o que falta além dele.
+            val jaNoColchao = colchao?.valor?.takeIf { d.grupo == GrupoAlocacao.RENDA_FIXA_POS } ?: Money.ZERO
+            val valor = (ctx.valorDePontos(d.falta) - jaNoColchao).takeIf { it >= VALOR_MINIMO } ?: return@mapNotNull null
             val motivo =
                 when (d.grupo) {
                     GrupoAlocacao.RENDA_FIXA_IPCA -> MotivoSugestao.PROTECAO_INFLACAO

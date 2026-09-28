@@ -84,3 +84,6 @@ internal val GrupoAlocacao.rotulo: String
             GrupoAlocacao.CAIXA -> "Caixa"
             GrupoAlocacao.A_CLASSIFICAR -> "A classificar"
         }
+
+/** "Renda fixa IPCA+" → "renda fixa IPCA+": minúscula só no começo, para o meio da frase. */
+internal val GrupoAlocacao.rotuloNaFrase: String get() = rotulo.replaceFirstChar { it.lowercase() }

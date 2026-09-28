@@ -2,24 +2,24 @@ package com.investimentoeasy.feature.analysis
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.investimentoeasy.core.ai.FabricaDeModelo
-import com.investimentoeasy.core.ai.GerarAnaliseIa
-import com.investimentoeasy.core.ai.RespostaDoModelo
-import com.investimentoeasy.core.ai.ResultadoAnaliseIa
-import com.investimentoeasy.core.ai.SaidaAnalise
-import com.investimentoeasy.core.ai.paraJson
-import com.investimentoeasy.core.ai.saidaDeJson
 import com.investimentoeasy.core.common.Io
 import com.investimentoeasy.core.domain.analise.AnalisarCarteira
 import com.investimentoeasy.core.domain.analise.AnaliseDeterministica
-import com.investimentoeasy.core.domain.analise.AnaliseGuardada
-import com.investimentoeasy.core.domain.analise.RepositorioDeAnalises
 import com.investimentoeasy.core.domain.complemento.ComplementoPlanilha
 import com.investimentoeasy.core.domain.complemento.RepositorioDeComplementos
+import com.investimentoeasy.core.domain.mercado.Perfil
+import com.investimentoeasy.core.domain.mercado.ProvedorDeMercado
+import com.investimentoeasy.core.domain.mercado.RepositorioDeMercado
+import com.investimentoeasy.core.domain.mercado.RepositorioDePerfil
+import com.investimentoeasy.core.domain.mercado.leituraDeCambio
+import com.investimentoeasy.core.domain.mercado.leituraDeJuros
+import com.investimentoeasy.core.domain.recomendacao.EntradaDoMotor
+import com.investimentoeasy.core.domain.recomendacao.MotorDeRecomendacao
+import com.investimentoeasy.core.domain.recomendacao.Recomendacao
 import com.investimentoeasy.core.domain.snapshot.SnapshotRepository
+import com.investimentoeasy.core.model.ChaveAtivo
+import com.investimentoeasy.core.model.PanoramaMercado
 import com.investimentoeasy.core.model.Snapshot
-import com.investimentoeasy.core.seguranca.CofreDeChave
-import com.investimentoeasy.core.seguranca.CofreIndisponivelException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,17 +29,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.Clock
-import java.time.Instant
+import java.time.Duration
+import java.time.LocalDate
 import javax.inject.Inject
-
-/** O que a análise lê e grava: base, análises do Claude e dados da planilha. */
-class FontesDaAnalise
-    @Inject
-    constructor(
-        val snapshots: SnapshotRepository,
-        val analises: RepositorioDeAnalises,
-        val complementos: RepositorioDeComplementos,
-    )
 
 /** As 7 abas da skill, na ordem do protótipo. */
 enum class AbaAnalise(
@@ -54,173 +46,117 @@ enum class AbaAnalise(
     ALERTAS("Alertas"),
 }
 
-data class AnaliseIa(
-    val saida: SaidaAnalise,
-    val geradaEm: Instant,
-    val modelo: String,
-)
-
 data class EstadoAnalise(
     val carregando: Boolean = true,
     val semCarteira: Boolean = false,
     val base: Snapshot? = null,
     val deterministica: AnaliseDeterministica? = null,
-    val ia: AnaliseIa? = null,
+    /** Só existe com o perfil escolhido: sem perfil não há alvo para recomendar. */
+    val recomendacao: Recomendacao? = null,
+    val perfil: Perfil? = null,
+    val panorama: PanoramaMercado? = null,
+    val atualizandoMercado: Boolean = false,
+    val escolhendoPerfil: Boolean = false,
     val aba: AbaAnalise = AbaAnalise.O_QUE_FAZER,
-    val temChave: Boolean = false,
-    val gerando: Boolean = false,
-    val erro: String? = null,
     /** Dados da planilha "Posição Detalhada" guardados para a base, se o usuário enviou. */
     val complemento: ComplementoPlanilha? = null,
 )
 
+/** O que a análise lê e grava: base, planilha, mercado em cache e perfil. */
+class FontesDaAnalise
+    @Inject
+    constructor(
+        val snapshots: SnapshotRepository,
+        val complementos: RepositorioDeComplementos,
+        val mercado: RepositorioDeMercado,
+        val perfil: RepositorioDePerfil,
+    )
+
 /**
- * As camadas 1 e 2 rodam sempre, no aparelho e sem custo. A Camada 3 (Claude) só roda quando o
- * usuário pede, com a chave dele, e o resultado fica guardado para a mesma base.
+ * Toda a análise roda no aparelho, sem custo: camadas 1 e 2 (cálculos e alertas) e o motor de
+ * recomendação. A rede só é usada para os dados públicos de mercado, que ficam em cache.
  */
 @HiltViewModel
 class AnaliseViewModel
     @Inject
     constructor(
         private val fontes: FontesDaAnalise,
-        private val cofre: CofreDeChave,
-        private val fabricaDeModelo: FabricaDeModelo,
+        private val provedor: ProvedorDeMercado,
         private val relogio: Clock,
         @param:Io private val io: CoroutineDispatcher,
     ) : ViewModel() {
         private val analisar = AnalisarCarteira()
+        private val motor = MotorDeRecomendacao()
         private val _estado = MutableStateFlow(EstadoAnalise())
         val estado: StateFlow<EstadoAnalise> = _estado.asStateFlow()
 
-        /** Chamado sempre que a tela aparece: a base pode ter mudado num upload. */
+        /** Chamado sempre que a tela aparece: a base pode ter mudado num upload. Mercado velho é atualizado. */
         fun carregar() {
             viewModelScope.launch {
-                val carregado = withContext(io) { carregarDoDisco() }
+                val lido =
+                    withContext(io) {
+                        val base = fontes.snapshots.base()
+                        Triple(base, base?.let { fontes.complementos.ultimo(it.id) }, fontes.mercado.ultimo())
+                    }
+                val (base, complemento, panorama) = lido
+                val perfil = fontes.perfil.ler()
                 _estado.update {
-                    it.copy(
-                        carregando = false,
-                        semCarteira = carregado.base == null,
-                        base = carregado.base,
-                        deterministica = carregado.deterministica,
-                        ia = carregado.ia,
-                        temChave = carregado.temChave,
-                        complemento = carregado.complemento,
+                    recalcular(
+                        it.copy(carregando = false, semCarteira = base == null, base = base, complemento = complemento, perfil = perfil),
+                        panorama,
                     )
                 }
+                if (base != null && mercadoVelho(panorama)) atualizarMercado()
             }
-        }
-
-        private suspend fun carregarDoDisco(): EstadoAnalise {
-            val base = fontes.snapshots.base()
-            val guardada = base?.let { fontes.analises.ultima(it.id) }
-            return EstadoAnalise(
-                base = base,
-                deterministica = base?.let(analisar::invoke),
-                ia = guardada?.let { g -> saidaDeJson(g.conteudoJson)?.let { AnaliseIa(it, g.geradaEm, g.modelo) } },
-                temChave = cofre.ler() != null,
-                complemento = base?.let { fontes.complementos.ultimo(it.id) },
-            )
         }
 
         fun selecionarAba(aba: AbaAnalise) {
             _estado.update { it.copy(aba = aba) }
         }
 
-        fun salvarChave(chave: String) {
-            if (chave.isBlank()) return
+        fun trocarPerfil() {
+            _estado.update { it.copy(escolhendoPerfil = true) }
+        }
+
+        fun escolherPerfil(perfil: Perfil) {
+            fontes.perfil.gravar(perfil)
+            _estado.update { recalcular(it.copy(perfil = perfil, escolhendoPerfil = false), it.panorama) }
+        }
+
+        fun atualizarMercado() {
+            val base = _estado.value.base ?: return
+            if (_estado.value.atualizandoMercado) return
+            _estado.update { it.copy(atualizandoMercado = true) }
             viewModelScope.launch {
-                val gravou =
+                val panorama =
                     withContext(io) {
-                        try {
-                            cofre.gravar(chave)
-                            true
-                        } catch (_: CofreIndisponivelException) {
-                            false
-                        }
+                        provedor.atualizar(tickers(base)).also { fontes.mercado.salvar(it) }
                     }
-                _estado.update {
-                    if (gravou) it.copy(temChave = true, erro = null) else it.copy(temChave = false, erro = ERRO_COFRE)
-                }
+                _estado.update { recalcular(it.copy(atualizandoMercado = false), panorama) }
             }
         }
 
-        fun apagarChave() {
-            viewModelScope.launch {
-                withContext(io) { cofre.apagar() }
-                _estado.update { it.copy(temChave = false) }
-            }
+        private fun recalcular(
+            estado: EstadoAnalise,
+            panorama: PanoramaMercado?,
+        ): EstadoAnalise {
+            val base = estado.base ?: return estado.copy(panorama = panorama, deterministica = null, recomendacao = null)
+            val hoje = LocalDate.now(relogio)
+            val analise = analisar(base, panorama?.let { leituraDeJuros(it, hoje) }, panorama?.let { leituraDeCambio(it, hoje) })
+            val recomendacao =
+                estado.perfil?.let { perfil -> motor(EntradaDoMotor(base, analise, perfil, panorama, estado.complemento, hoje)) }
+            return estado.copy(panorama = panorama, deterministica = analise, recomendacao = recomendacao)
         }
 
-        fun gerarAnalise() {
-            val atual = _estado.value
-            val base = atual.base ?: return
-            val deterministica = atual.deterministica ?: return
-            if (atual.gerando) return
-            _estado.update { it.copy(gerando = true, erro = null) }
-            viewModelScope.launch {
-                val resultado =
-                    withContext(io) {
-                        val chave = cofre.ler() ?: return@withContext null
-                        val r = gerarSemDerrubar(chave, base, deterministica, atual.complemento)
-                        if (r is ResultadoAnaliseIa.Gerada) {
-                            fontes.analises.salvar(
-                                AnaliseGuardada(base.id, relogio.instant(), r.modelo, r.versaoPrompt, r.saida.paraJson()),
-                            )
-                        }
-                        r
-                    }
-                _estado.update { estado ->
-                    when (resultado) {
-                        null ->
-                            estado.copy(
-                                gerando = false,
-                                temChave = false,
-                                erro = "Configure a chave da API do Claude para gerar a análise.",
-                            )
-                        is ResultadoAnaliseIa.Gerada ->
-                            estado.copy(gerando = false, ia = AnaliseIa(resultado.saida, relogio.instant(), resultado.modelo), erro = null)
-                        is ResultadoAnaliseIa.Rejeitada -> estado.copy(gerando = false, erro = mensagemRejeitada(resultado))
-                        is ResultadoAnaliseIa.Falhou -> estado.copy(gerando = false, erro = mensagemDe(resultado.motivo))
-                    }
-                }
-            }
+        private fun mercadoVelho(panorama: PanoramaMercado?): Boolean =
+            panorama == null || Duration.between(panorama.obtidoEm, relogio.instant()) > VALIDADE_DO_MERCADO
+
+        private companion object {
+            /** Cotação e Focus mudam no dia; mais que isso, a tela atualiza sozinha ao abrir. */
+            val VALIDADE_DO_MERCADO: Duration = Duration.ofHours(6)
         }
-
-        /** Última barreira: qualquer falha inesperada vira mensagem na tela, com o tipo do erro para diagnóstico. */
-        @Suppress("TooGenericExceptionCaught")
-        private fun gerarSemDerrubar(
-            chave: String,
-            base: Snapshot,
-            deterministica: AnaliseDeterministica,
-            complemento: ComplementoPlanilha?,
-        ): ResultadoAnaliseIa =
-            try {
-                GerarAnaliseIa(fabricaDeModelo.criar(chave))(base, deterministica, complemento)
-            } catch (e: RuntimeException) {
-                falhaInesperada(e)
-            } catch (e: LinkageError) {
-                // Classe ou método do SDK que não existe no Android: melhor mostrar do que fechar o app.
-                falhaInesperada(e)
-            }
-
-        private fun falhaInesperada(e: Throwable) =
-            ResultadoAnaliseIa.Falhou(RespostaDoModelo.Erro("falha inesperada (${e::class.java.simpleName})"))
     }
 
-internal const val ERRO_COFRE =
-    "Não foi possível guardar a chave no armazenamento seguro do aparelho. Tente de novo; se continuar, reinicie o celular."
-
-internal fun mensagemRejeitada(r: ResultadoAnaliseIa.Rejeitada): String =
-    "A resposta do Claude citou dados que não existem na sua carteira e foi descartada " +
-        "(${r.violacoes.size} ${if (r.violacoes.size == 1) "problema" else "problemas"}). Nada foi salvo. Tente gerar de novo."
-
-internal fun mensagemDe(motivo: RespostaDoModelo): String =
-    when (motivo) {
-        RespostaDoModelo.ChaveInvalida -> "A chave da API foi recusada. Confira a chave nas configurações da análise."
-        RespostaDoModelo.LimiteDeUso -> "Limite de uso da API atingido. Tente de novo em alguns minutos."
-        RespostaDoModelo.SemConexao -> "Sem conexão com a API do Claude. Verifique a internet e tente de novo."
-        RespostaDoModelo.Recusa -> "O modelo recusou gerar esta análise."
-        RespostaDoModelo.Incompleta -> "A resposta veio incompleta. Tente de novo."
-        is RespostaDoModelo.Erro -> "Não foi possível gerar a análise: ${motivo.mensagem}."
-        is RespostaDoModelo.Texto -> "Resposta inesperada do modelo."
-    }
+/** Só tickers (nunca valores ou quantidades) saem do aparelho, para buscar cotação. */
+internal fun tickers(base: Snapshot): Set<String> =
+    base.posicoes.filter { !it.saldo.valor.isZero }.mapNotNull { (it.ativo.chave as? ChaveAtivo.Ticker)?.codigo }.toSet()

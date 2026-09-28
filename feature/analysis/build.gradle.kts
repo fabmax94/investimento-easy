@@ -7,8 +7,6 @@ android {
 }
 
 dependencies {
-    implementation(projects.core.ai)
-    implementation(projects.core.seguranca)
     testImplementation(testFixtures(projects.parser.xperformance))
     testImplementation(testFixtures(projects.parser.xlsx))
     testImplementation(projects.core.importacao)

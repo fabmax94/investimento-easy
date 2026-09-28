@@ -34,14 +34,17 @@
 | Tela 1 Carteira (versão Fase 1: base confirmada, sem estimativa) | ✅ | `feature/portfolio/` |
 | A1 Dados do relatório para a análise (%CDI, índices, evolução mensal) + migrações Room v1→v3 | ✅ | `core/model/`, `core/database/` |
 | A2 Motor Camadas 1 e 2 (Ritmo, Cenário, gestora, FGC, vencimentos, simbólicas, saques, RV global, lacunas, alertas por severidade) | ✅ | `core/domain/.../analise/` |
-| A3 Camada 3 com o Claude (SDK Java, saída estruturada, prompt versionado sem dado pessoal, validador de números) | ✅ (testado só contra servidor falso) | `core/ai/` |
-| A3b Chave da API cifrada com AES-GCM no Android Keystore | ✅ (Keystore real precisa de teste instrumentado) | `core/seguranca/` |
+| A3 Camada 3 com o Claude | ❌ removida a pedido: pouco prática (chave paga, latência). Substituída por M1–M4 | — |
 | A4 Tela 5 Análise: 7 abas, veredicto, plano de 30 dias, Ritmo/Cenário, origem, disclaimer, análise guardada | ✅ | `feature/analysis/` |
 | T1.10 Planilha "Posição Detalhada" (.xlsx): leitor seguro + parser; complementa a base (preço médio, valor aplicado, taxa/datas da RF, proventos) | ✅ validado contra uma planilha real | `parser/xlsx/`, `core/domain/.../complemento/` |
 | T1.10b Casamento planilha × base (chave R4 e, para fundos, palavras do nome), tela "Conferir planilha", Room v4 | ✅ | `feature/upload/`, `core/database/` |
-| T1.10c Custo e resultado estimado nas abas e na entrada do Claude (prompt `analise-v2`) | ✅ | `core/ai/`, `feature/analysis/` |
+| T1.10c Custo e resultado estimado nas abas e nas realocações (efeito fiscal) | ✅ | `core/domain/.../complemento/`, `feature/analysis/` |
+| M1 Dados de mercado gratuitos (BC, Focus, Yahoo, CVM), em paralelo e tolerante a falha | ✅ validado contra as fontes reais (`-PfontesReais`) | `core/mercado/` |
+| M2 Perfil (conservador/moderado/arrojado), ciclo de juros e câmbio do Focus, P/VP e DY de FIIs | ✅ | `core/domain/.../mercado/` |
+| M3 Motor de recomendação no aparelho (veredicto, plano, realocações, sugestões, textos por aba) | ✅ validado com a carteira real | `core/domain/.../recomendacao/` |
+| M4 Tela Análise sem IA, escolha de perfil, cache de mercado (Room v5) | ✅ | `feature/analysis/`, `core/database/` |
 
-Números atuais: 310 testes (JVM e Robolectric), cobertura agregada de 95% sem código gerado,
+Números atuais: 311 testes (JVM e Robolectric), cobertura agregada de 95% sem código gerado,
 screenshots versionados em claro, escuro e fonte 200%.
 
 **Aprendizados do relatório real** (incorporados ao código e aos testes):

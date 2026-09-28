@@ -1,16 +1,17 @@
 package com.investimentoeasy.app.di
 
-import com.investimentoeasy.core.ai.ClaudeModelo
-import com.investimentoeasy.core.ai.FabricaDeModelo
 import com.investimentoeasy.core.domain.complemento.ComplementarBase
 import com.investimentoeasy.core.domain.complemento.RepositorioDeComplementos
+import com.investimentoeasy.core.domain.mercado.ProvedorDeMercado
 import com.investimentoeasy.core.domain.snapshot.ConfirmarSnapshot
 import com.investimentoeasy.core.domain.snapshot.SnapshotRepository
+import com.investimentoeasy.core.mercado.ProvedorDeMercadoHttp
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import java.time.Clock
+import javax.inject.Singleton
 
 /** Casos de uso do domínio (Kotlin puro, sem Hilt) montados com as dependências do app. */
 @Module
@@ -30,7 +31,8 @@ object DominioModule {
         relogio: Clock,
     ): ComplementarBase = ComplementarBase(repositorio, complementos, relogio)
 
-    /** Camada 3: Claude pela API, com a chave que o usuário configurou. */
+    /** Dados de mercado de fontes gratuitas (Banco Central, Focus, Yahoo Finance, CVM). */
     @Provides
-    fun fabricaDeModelo(): FabricaDeModelo = FabricaDeModelo { chave -> ClaudeModelo.comChave(chave) }
+    @Singleton
+    fun provedorDeMercado(relogio: Clock): ProvedorDeMercado = ProvedorDeMercadoHttp(relogio)
 }

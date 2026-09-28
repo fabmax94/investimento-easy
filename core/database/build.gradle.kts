@@ -14,5 +14,6 @@ android {
 dependencies {
     implementation(projects.core.domain)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.core.ktx)
     testImplementation(projects.core.testing)
 }

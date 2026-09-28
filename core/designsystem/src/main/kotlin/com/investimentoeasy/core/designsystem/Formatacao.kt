@@ -20,6 +20,7 @@ public object Formatacao {
     private val SIMBOLOS = DecimalFormatSymbols(LOCALE)
     private val DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy", LOCALE)
     private val DATA_CURTA = DateTimeFormatter.ofPattern("dd/MM", LOCALE)
+    private val DATA_HORA = DateTimeFormatter.ofPattern("dd/MM 'às' HH:mm", LOCALE)
 
     /** "R$ 1.234,56"; com `centavos = false`, "R$ 1.235". Negativo: "−R$ 1.234,56". */
     public fun reais(
@@ -60,12 +61,19 @@ public object Formatacao {
 
     public fun dataCurta(valor: LocalDate?): String = valor?.format(DATA_CURTA) ?: AUSENTE
 
-    private fun numero(
+    /** "26/09 às 12:05", no fuso do aparelho. */
+    public fun dataHora(
+        valor: java.time.Instant,
+        fuso: java.time.ZoneId = java.time.ZoneId.systemDefault(),
+    ): String = valor.atZone(fuso).format(DATA_HORA)
+
+    /** "183.477" / "5,20": número puro no padrão brasileiro, arredondado em [casas]. */
+    public fun numero(
         valor: java.math.BigDecimal,
         casas: Int,
     ): String {
         val padrao = if (casas == 0) "#,##0" else "#,##0." + "0".repeat(casas)
-        return DecimalFormat(padrao, SIMBOLOS).format(valor)
+        return DecimalFormat(padrao, SIMBOLOS).format(valor.setScale(casas, RoundingMode.HALF_EVEN))
     }
 
     /** Sinal de menos tipográfico (U+2212), como no protótipo. */

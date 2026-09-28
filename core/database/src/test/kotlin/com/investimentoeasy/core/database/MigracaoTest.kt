@@ -44,7 +44,7 @@ class MigracaoTest {
                 v1.execSQL("INSERT INTO base (unica, snapshotId) VALUES (1, 's1')")
             }
 
-            helper.runMigrationsAndValidate(nome, 4, true, *InvestimentoDatabase.MIGRACOES).use { v2 ->
+            helper.runMigrationsAndValidate(nome, 5, true, *InvestimentoDatabase.MIGRACOES).use { v2 ->
                 shouldThrow<SQLiteException> { v2.execSQL("UPDATE snapshot SET versao = 2 WHERE id = 's1'") }
                 shouldThrow<SQLiteException> { v2.execSQL("DELETE FROM posicao WHERE snapshotId = 's1'") }
             }

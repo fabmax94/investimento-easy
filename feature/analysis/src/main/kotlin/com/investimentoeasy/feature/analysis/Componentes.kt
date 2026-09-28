@@ -66,20 +66,23 @@ private fun Celula(
 @Composable
 fun NotaRitmoCenario() {
     Text(
-        "Ritmo compara o retorno do ano com o de 24 meses (anualizados). Cenário é a sensibilidade ao ciclo de juros, " +
-            "se o corte continuar. Nenhum dos dois é previsão de preço.",
+        "Ritmo compara o retorno do ano com o de 24 meses (anualizados). Cenário é a sensibilidade ao ciclo de juros que o " +
+            "Focus indica (sem dados de mercado, supõe que o corte continue). Nenhum dos dois é previsão de preço.",
         style = Castanha.tipografia.legenda,
         color = Castanha.cores.textMedium,
     )
 }
 
-/** Notas do Claude numa aba, marcadas como interpretação. */
+/** Leitura gerada pelas regras do app, marcada como tal. */
 @Composable
-fun NotasDoClaude(notas: List<String>) {
+fun NotasDoApp(
+    titulo: String,
+    notas: List<String>,
+) {
     if (notas.isEmpty()) return
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        TituloSecao("Leitura do Claude")
-        notas.forEach { CartaoAviso(Tom.NEUTRO, "INTERPRETAÇÃO", it) }
+        TituloSecao(titulo)
+        notas.forEach { CartaoAviso(Tom.NEUTRO, "LEITURA DO APP", it) }
     }
 }
 

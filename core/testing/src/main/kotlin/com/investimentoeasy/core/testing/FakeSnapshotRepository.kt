@@ -1,10 +1,12 @@
 package com.investimentoeasy.core.testing
 
-import com.investimentoeasy.core.domain.analise.AnaliseGuardada
-import com.investimentoeasy.core.domain.analise.RepositorioDeAnalises
 import com.investimentoeasy.core.domain.complemento.ComplementoPlanilha
 import com.investimentoeasy.core.domain.complemento.RepositorioDeComplementos
+import com.investimentoeasy.core.domain.mercado.Perfil
+import com.investimentoeasy.core.domain.mercado.RepositorioDeMercado
+import com.investimentoeasy.core.domain.mercado.RepositorioDePerfil
 import com.investimentoeasy.core.domain.snapshot.SnapshotRepository
+import com.investimentoeasy.core.model.PanoramaMercado
 import com.investimentoeasy.core.model.Snapshot
 import com.investimentoeasy.core.model.SnapshotId
 
@@ -31,17 +33,6 @@ public class FakeSnapshotRepository(
     }
 }
 
-public class FakeRepositorioDeAnalises : RepositorioDeAnalises {
-    public val salvas: MutableList<AnaliseGuardada> = mutableListOf()
-
-    override suspend fun salvar(analise: AnaliseGuardada) {
-        salvas += analise
-    }
-
-    override suspend fun ultima(snapshotId: SnapshotId): AnaliseGuardada? =
-        salvas.filter { it.snapshotId == snapshotId }.maxByOrNull { it.geradaEm }
-}
-
 public class FakeRepositorioDeComplementos : RepositorioDeComplementos {
     public val salvos: MutableList<ComplementoPlanilha> = mutableListOf()
 
@@ -50,4 +41,24 @@ public class FakeRepositorioDeComplementos : RepositorioDeComplementos {
     }
 
     override suspend fun ultimo(snapshotId: SnapshotId): ComplementoPlanilha? = salvos.lastOrNull { it.snapshotId == snapshotId }
+}
+
+public class FakeRepositorioDeMercado(
+    private var panorama: PanoramaMercado? = null,
+) : RepositorioDeMercado {
+    override suspend fun salvar(panorama: PanoramaMercado) {
+        this.panorama = panorama
+    }
+
+    override suspend fun ultimo(): PanoramaMercado? = panorama
+}
+
+public class FakeRepositorioDePerfil(
+    private var perfil: Perfil? = null,
+) : RepositorioDePerfil {
+    override fun ler(): Perfil? = perfil
+
+    override fun gravar(perfil: Perfil) {
+        this.perfil = perfil
+    }
 }

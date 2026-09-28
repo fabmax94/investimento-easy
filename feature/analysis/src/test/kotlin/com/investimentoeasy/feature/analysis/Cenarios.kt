@@ -1,91 +1,111 @@
 package com.investimentoeasy.feature.analysis
 
-import com.investimentoeasy.core.ai.Acao
-import com.investimentoeasy.core.ai.ComentarioAlerta
-import com.investimentoeasy.core.ai.Comentarios
-import com.investimentoeasy.core.ai.Diagnostico
-import com.investimentoeasy.core.ai.Diagnosticos
-import com.investimentoeasy.core.ai.Notas
-import com.investimentoeasy.core.ai.NovoAtivo
-import com.investimentoeasy.core.ai.OQueFazer
-import com.investimentoeasy.core.ai.Prioridade
-import com.investimentoeasy.core.ai.Realocacao
-import com.investimentoeasy.core.ai.SaidaAnalise
-import com.investimentoeasy.core.ai.StatusDiagnostico
-import com.investimentoeasy.core.ai.TextoAba
 import com.investimentoeasy.core.domain.analise.AnalisarCarteira
-import com.investimentoeasy.core.domain.analise.TipoLacuna
 import com.investimentoeasy.core.domain.complemento.CasarPlanilha
 import com.investimentoeasy.core.domain.complemento.ComplementoPlanilha
+import com.investimentoeasy.core.domain.mercado.Perfil
+import com.investimentoeasy.core.domain.mercado.leituraDeCambio
+import com.investimentoeasy.core.domain.mercado.leituraDeJuros
+import com.investimentoeasy.core.domain.recomendacao.EntradaDoMotor
+import com.investimentoeasy.core.domain.recomendacao.MotorDeRecomendacao
 import com.investimentoeasy.core.importacao.ArquivoRecebido
 import com.investimentoeasy.core.importacao.ExtratorDeTextoPdf
 import com.investimentoeasy.core.importacao.ImportarRelatorio
 import com.investimentoeasy.core.importacao.ResultadoImportacao
+import com.investimentoeasy.core.model.Cotacao
+import com.investimentoeasy.core.model.ExpectativasFocus
+import com.investimentoeasy.core.model.FalhaDeFonte
+import com.investimentoeasy.core.model.FonteMercado
+import com.investimentoeasy.core.model.InformeFii
+import com.investimentoeasy.core.model.PanoramaMercado
+import com.investimentoeasy.core.model.Percent
 import com.investimentoeasy.core.model.Snapshot
 import com.investimentoeasy.core.model.StatusSnapshot
+import com.investimentoeasy.core.model.ValorDeMercado
 import com.investimentoeasy.parser.xlsx.FixturesPlanilhaXp
 import com.investimentoeasy.parser.xperformance.FixturesXPerformance
+import java.math.BigDecimal
 import java.time.Instant
+import java.time.LocalDate
 
-/** Carteira sintética do parser, confirmada, e uma análise do Claude com números dela. */
+/** Carteira sintética do parser, confirmada, e um mercado sintético no formato das fontes reais. */
 internal object Cenarios {
+    val hoje: LocalDate = LocalDate.of(2026, 9, 13)
+    val instante: Instant = Instant.parse("2026-09-13T12:00:00Z")
+
     val snapshot: Snapshot =
         (
             ImportarRelatorio(ExtratorDeTextoPdf { FixturesXPerformance.sintetico() })
                 .importar(ArquivoRecebido("x.pdf", null, "%PDF".toByteArray())) as ResultadoImportacao.Lido
         ).revisao.rascunho!!.copy(status = StatusSnapshot.CONFIRMADO)
 
-    val deterministica = AnalisarCarteira()(snapshot)
-
-    /** Planilha sintética casada com a base sintética. */
     val complemento: ComplementoPlanilha =
         (
             ImportarRelatorio(ExtratorDeTextoPdf { emptyList() })
                 .importar(ArquivoRecebido("p.xlsx", null, FixturesPlanilhaXp.bytes())) as ResultadoImportacao.PlanilhaLida
-        ).let { CasarPlanilha()(snapshot, it.planilha, Instant.parse("2026-09-13T12:00:00Z")).complemento }
+        ).let { CasarPlanilha()(snapshot, it.planilha, instante).complemento }
 
-    val saida =
-        SaidaAnalise(
-            veredicto = "A performance não é o problema. O risco está em 33,3% em renda variável global e na falta de colchão de liquidez.",
-            oQueFazer =
-                OQueFazer(
-                    acoes30Dias =
-                        listOf(
-                            Acao("Resolver o RECR12", "A posição tem quantidade e saldo zero: confirme com o assessor."),
-                            Acao("Conferir o LFTB11", "O relatório mostra 34,36% no mês, fora do plausível para pós-fixado."),
-                        ),
-                    realocacoes = listOf(Realocacao("Trend Nasdaq 100 FIA", "Reduz a exposição global de 33,3%.", "IMAB11", "10000.00")),
-                    novosAtivos =
-                        listOf(
-                            NovoAtivo(
-                                "IMAB11",
-                                TipoLacuna.PROTECAO_INFLACAO,
-                                Prioridade.ALTA,
-                                "10000.00",
-                                "IPCA+ está em 3,33% da carteira.",
-                            ),
-                        ),
+    private fun cotacao(
+        simbolo: String,
+        preco: String,
+        r12: String,
+    ) = Cotacao(simbolo, BigDecimal(preco), hoje, Percent.of("2.1"), Percent.of("4.0"), Percent.of(r12), BigDecimal(preco) + BigDecimal(5))
+
+    private fun informe(
+        raiz: String,
+        vp: String,
+        dy12: String,
+        dyMes: String,
+    ) = InformeFii(raiz, LocalDate.of(2026, 8, 1), BigDecimal(vp), Percent.of(dy12), Percent.of(dyMes), 12)
+
+    val panorama: PanoramaMercado =
+        PanoramaMercado(
+            obtidoEm = instante,
+            selicMeta = ValorDeMercado(BigDecimal("13.75"), hoje, FonteMercado.BANCO_CENTRAL),
+            ipca12Meses = ValorDeMercado(BigDecimal("4.22"), LocalDate.of(2026, 8, 1), FonteMercado.BANCO_CENTRAL),
+            dolar = ValorDeMercado(BigDecimal("5.20"), hoje, FonteMercado.BANCO_CENTRAL),
+            focus =
+                ExpectativasFocus(
+                    LocalDate.of(2026, 9, 11),
+                    sortedMapOf(2026 to BigDecimal("13.50"), 2027 to BigDecimal("12.00"), 2028 to BigDecimal("10.50")),
+                    sortedMapOf(2026 to BigDecimal("4.92"), 2027 to BigDecimal("4.30"), 2028 to BigDecimal("3.80")),
+                    sortedMapOf(2026 to BigDecimal("5.20"), 2027 to BigDecimal("5.28"), 2028 to BigDecimal("5.30")),
                 ),
-            mercado = TextoAba("O CDI rendeu 9,50% no ano; a carteira, 8,10%."),
-            alocacao = Diagnosticos(listOf(Diagnostico(StatusDiagnostico.CRITICO, "Exterior em 33,3%, acima do limite de 30%."))),
-            fundos = Notas(listOf("Trend Ouro FIF Multi RL está em 71,47% do CDI no ano.")),
-            fiis = Notas(listOf("HGLG11 desacelerando; sem P/VP não dá para dizer se a queda é cíclica.")),
-            acoesEtfs = Notas(listOf("BOVA11 com 152,32% do CDI no ano.")),
-            alertas = Comentarios(listOf(ComentarioAlerta("EXPOSICAO_GLOBAL", "Dois ativos concentram a exposição global."))),
+            ibovespa = cotacao("^BVSP", "183477", "26.3"),
+            ifix = cotacao("XFIX11.SA", "13.17", "4.2"),
+            cotacoes =
+                mapOf(
+                    "BOVA11" to cotacao("BOVA11.SA", "180.82", "27.1"),
+                    "HGLG11" to cotacao("HGLG11.SA", "147.86", "-12.0"),
+                    "KNCR11" to cotacao("KNCR11.SA", "106.38", "15.6"),
+                ),
+            fiis =
+                mapOf(
+                    "HGLG" to informe("HGLG", "165.95", "7.97", "0.70"),
+                    "KNCR" to informe("KNCR", "102.64", "13.70", "1.12"),
+                ),
+            falhas = emptyList(),
         )
 
     fun estado(
-        ia: Boolean = false,
         aba: AbaAnalise = AbaAnalise.O_QUE_FAZER,
-        temChave: Boolean = false,
+        perfil: Perfil? = Perfil.MODERADO,
+        comMercado: Boolean = true,
         comPlanilha: Boolean = false,
-    ) = EstadoAnalise(
-        carregando = false,
-        base = snapshot,
-        deterministica = deterministica,
-        ia = if (ia) AnaliseIa(saida, Instant.parse("2026-09-13T12:00:00Z"), "claude-opus-5") else null,
-        aba = aba,
-        temChave = temChave,
-        complemento = if (comPlanilha) complemento else null,
-    )
+        falhas: List<FalhaDeFonte> = emptyList(),
+    ): EstadoAnalise {
+        val mercado = panorama.copy(falhas = falhas).takeIf { comMercado }
+        val analise = AnalisarCarteira()(snapshot, mercado?.let { leituraDeJuros(it, hoje) }, mercado?.let { leituraDeCambio(it, hoje) })
+        val complementoUsado = complemento.takeIf { comPlanilha }
+        return EstadoAnalise(
+            carregando = false,
+            base = snapshot,
+            deterministica = analise,
+            recomendacao = perfil?.let { MotorDeRecomendacao()(EntradaDoMotor(snapshot, analise, it, mercado, complementoUsado, hoje)) },
+            perfil = perfil,
+            panorama = mercado,
+            aba = aba,
+            complemento = complementoUsado,
+        )
+    }
 }

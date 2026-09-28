@@ -11,6 +11,9 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.investimentoeasy.core.designsystem.CastanhaTema
+import com.investimentoeasy.core.domain.mercado.Perfil
+import com.investimentoeasy.core.model.FalhaDeFonte
+import com.investimentoeasy.core.model.FonteMercado
 import io.kotest.matchers.shouldBe
 import org.junit.Rule
 import org.junit.Test
@@ -21,7 +24,7 @@ import org.robolectric.annotation.GraphicsMode
 
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "w390dp-h2200dp-xhdpi")
+@Config(qualifiers = "w390dp-h2600dp-xhdpi")
 class AnaliseScreenTest {
     @get:Rule
     val compose = createComposeRule()
@@ -29,59 +32,72 @@ class AnaliseScreenTest {
     private fun tela(
         estado: EstadoAnalise,
         escuro: Boolean = false,
-        aoSelecionar: (AbaAnalise) -> Unit = {},
-        aoGerar: () -> Unit = {},
-        aoSalvar: (String) -> Unit = {},
-    ) = compose.setContent {
-        CastanhaTema(escuro = escuro) { AnaliseScreen(estado, aoSelecionar, aoGerar, aoSalvar, aoApagarChave = {}) }
-    }
+        acoes: AcoesAnalise = AcoesAnalise(),
+    ) = compose.setContent { CastanhaTema(escuro = escuro) { AnaliseScreen(estado, acoes) } }
 
     private fun capturar(nome: String) = compose.onRoot().captureRoboImage("src/test/screenshots/$nome.png")
 
     @Test
-    fun o_que_fazer_sem_analise_do_claude_pede_a_chave() {
-        tela(Cenarios.estado())
+    fun sem_perfil_pede_o_perfil() {
+        var escolhido: Perfil? = null
+        tela(Cenarios.estado(perfil = null), acoes = AcoesAnalise(aoEscolherPerfil = { escolhido = it }))
         compose.onNodeWithText("O que fazer").assertIsSelected()
+        compose.onNodeWithText("QUAL É O SEU PERFIL?").assertExists()
         compose.onNodeWithText("Principais alertas").assertExists()
-        capturar("analise_sem_claude")
+        capturar("analise_escolher_perfil")
+        compose.onNodeWithText("Moderado").performClick()
+        escolhido shouldBe Perfil.MODERADO
     }
 
     @Test
-    fun o_que_fazer_com_chave_gera() {
-        var gerou = 0
-        tela(Cenarios.estado(temChave = true), aoGerar = { gerou++ })
-        compose.onNodeWithText("Gerar análise com o Claude").performClick()
-        gerou shouldBe 1
-    }
-
-    @Test
-    fun o_que_fazer_com_analise() {
-        tela(Cenarios.estado(ia = true, temChave = true))
+    fun o_que_fazer_com_perfil_e_mercado() {
+        var trocou = 0
+        tela(Cenarios.estado(), acoes = AcoesAnalise(aoTrocarPerfil = { trocou++ }))
+        compose.onNodeWithText("VEREDICTO").assertExists()
         compose.onNodeWithText("Próximos 30 dias").assertExists()
-        compose.onNodeWithText("Trend Nasdaq 100 FIA → IMAB11").assertExists()
+        compose.onNodeWithText("Gerado no aparelho · Perfil moderado").assertExists()
+        compose.onNodeWithText("Mercado de ", substring = true).assertExists()
         capturar("analise_o_que_fazer")
+        compose.onNodeWithText("Trocar perfil").performClick()
+        trocou shouldBe 1
     }
 
     @Test
-    @Config(qualifiers = "w390dp-h2200dp-night-xhdpi")
+    @Config(qualifiers = "w390dp-h2600dp-night-xhdpi")
     fun o_que_fazer_escuro() {
-        tela(Cenarios.estado(ia = true, temChave = true), escuro = true)
+        tela(Cenarios.estado(), escuro = true)
         capturar("analise_o_que_fazer_escuro")
+    }
+
+    @Test
+    fun sem_mercado_avisa_e_deixa_atualizar() {
+        var atualizou = 0
+        tela(Cenarios.estado(comMercado = false), acoes = AcoesAnalise(aoAtualizarMercado = { atualizou++ }))
+        compose.onNodeWithText("Sem dados de mercado: a análise usa só o relatório.").assertExists()
+        compose.onNodeWithText("Atualizar").performClick()
+        atualizou shouldBe 1
+    }
+
+    @Test
+    fun fonte_fora_do_ar_aparece_no_status() {
+        tela(Cenarios.estado(falhas = listOf(FalhaDeFonte(FonteMercado.CVM, "HTTP 500"))))
+        compose.onNodeWithText("! FONTE INDISPONÍVEL").assertExists()
+        compose.onNodeWithText("Não responderam: CVM, informe mensal de FIIs.", substring = true).assertExists()
     }
 
     @Test
     fun trocar_de_aba() {
         var aba: AbaAnalise? = null
-        tela(Cenarios.estado(), aoSelecionar = { aba = it })
+        tela(Cenarios.estado(), acoes = AcoesAnalise(aoSelecionarAba = { aba = it }))
         compose.onNodeWithText("FIIs").performScrollTo().performClick()
         aba shouldBe AbaAnalise.FIIS
     }
 
     @Test
-    fun abas_com_analise() {
+    fun abas_com_recomendacao() {
         var aba by mutableStateOf(AbaAnalise.MERCADO)
         compose.setContent {
-            CastanhaTema(escuro = false) { AnaliseScreen(Cenarios.estado(ia = true, aba = aba, temChave = true), {}, {}, {}, {}) }
+            CastanhaTema(escuro = false) { AnaliseScreen(Cenarios.estado(aba = aba, comPlanilha = true), AcoesAnalise()) }
         }
         AbaAnalise.entries.drop(1).forEach {
             aba = it
@@ -91,31 +107,37 @@ class AnaliseScreenTest {
     }
 
     @Test
-    fun alertas_mostram_severidade_e_comentario() {
-        tela(Cenarios.estado(ia = true, aba = AbaAnalise.ALERTAS))
-        compose.onNodeWithText("● URGENTE").assertExists()
-        compose.onNodeWithText("Dois ativos concentram a exposição global.").assertExists()
+    fun mercado_mostra_indicadores_e_focus() {
+        tela(Cenarios.estado(aba = AbaAnalise.MERCADO))
+        compose.onNodeWithText("Indicadores de hoje").assertExists()
+        compose.onNodeWithText("Boletim Focus (11/09/2026)").assertExists()
+        compose.onNodeWithText("O mercado e a sua carteira").assertExists()
     }
 
     @Test
-    fun fiis_e_acoes_com_planilha_mostram_custo_e_resultado() {
-        var aba by mutableStateOf(AbaAnalise.FIIS)
-        compose.setContent {
-            CastanhaTema(escuro = false) {
-                AnaliseScreen(Cenarios.estado(aba = aba, comPlanilha = true), {}, {}, {}, {})
-            }
-        }
-        compose.onNodeWithText("PM R$ 95,00", substring = true).assertExists()
+    fun fiis_mostram_p_vp_e_custo_da_planilha() {
+        tela(Cenarios.estado(aba = AbaAnalise.FIIS, comPlanilha = true))
+        compose.onNodeWithText("HGLG11: P/VP", substring = true).assertExists()
+        compose.onNodeWithText("PM R$ 160,00", substring = true).assertExists()
         compose.onNodeWithText("ⓘ PREÇO MÉDIO E RESULTADO").assertDoesNotExist()
-        capturar("analise_fiis_com_planilha")
-        aba = AbaAnalise.ACOES_ETFS
-        compose.waitForIdle()
-        compose.onNodeWithText("PM R$ 151,23", substring = true).assertExists()
     }
 
     @Test
     fun sem_planilha_explica_de_onde_vem_o_preco_medio() {
         tela(Cenarios.estado(aba = AbaAnalise.FIIS))
         compose.onNodeWithText("ⓘ PREÇO MÉDIO E RESULTADO").assertExists()
+    }
+
+    @Test
+    fun alertas_mostram_severidade_e_comentario() {
+        tela(Cenarios.estado(aba = AbaAnalise.ALERTAS))
+        compose.onNodeWithText("● URGENTE").assertExists()
+        compose.onNodeWithText("em renda variável global, acima do limite de 30%", substring = true).assertExists()
+    }
+
+    @Test
+    fun alocacao_contra_o_perfil() {
+        tela(Cenarios.estado(aba = AbaAnalise.ALOCACAO))
+        compose.onNodeWithText("Contra o perfil moderado").assertExists()
     }
 }

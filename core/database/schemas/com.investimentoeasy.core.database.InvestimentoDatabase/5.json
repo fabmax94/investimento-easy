@@ -1,0 +1,374 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 5,
+    "identityHash": "0cc4cedb0dbc4c73b4e22e740612e679",
+    "entities": [
+      {
+        "tableName": "snapshot",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `dataReferencia` TEXT NOT NULL, `patrimonio` TEXT, `patrimonioOrigem` TEXT, `metodo` TEXT NOT NULL, `versao` INTEGER NOT NULL, `confirmadoEm` INTEGER, `divergenciaAceita` INTEGER NOT NULL, `contexto` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataReferencia",
+            "columnName": "dataReferencia",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "patrimonio",
+            "columnName": "patrimonio",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patrimonioOrigem",
+            "columnName": "patrimonioOrigem",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "metodo",
+            "columnName": "metodo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "versao",
+            "columnName": "versao",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "confirmadoEm",
+            "columnName": "confirmadoEm",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "divergenciaAceita",
+            "columnName": "divergenciaAceita",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contexto",
+            "columnName": "contexto",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "posicao",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`snapshotId` TEXT NOT NULL, `ordem` INTEGER NOT NULL, `chave` TEXT NOT NULL, `nome` TEXT NOT NULL, `tipo` TEXT NOT NULL, `classe` TEXT NOT NULL, `gestora` TEXT, `emissor` TEXT, `indexador` TEXT, `taxa` TEXT, `vencimento` TEXT, `saldo` TEXT NOT NULL, `saldoOrigem` TEXT NOT NULL, `quantidade` TEXT, `quantidadeOrigem` TEXT, `rentabilidadeMes` TEXT, `rentabilidadeMesOrigem` TEXT, `rentabilidadeAno` TEXT, `rentabilidadeAnoOrigem` TEXT, `rentabilidade24Meses` TEXT, `rentabilidade24MesesOrigem` TEXT, `percentualCdiMes` TEXT, `percentualCdiMesOrigem` TEXT, `percentualCdiAno` TEXT, `percentualCdiAnoOrigem` TEXT, `percentualCdi24Meses` TEXT, `percentualCdi24MesesOrigem` TEXT, PRIMARY KEY(`snapshotId`, `ordem`), FOREIGN KEY(`snapshotId`) REFERENCES `snapshot`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "snapshotId",
+            "columnName": "snapshotId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ordem",
+            "columnName": "ordem",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chave",
+            "columnName": "chave",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nome",
+            "columnName": "nome",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tipo",
+            "columnName": "tipo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "classe",
+            "columnName": "classe",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "gestora",
+            "columnName": "gestora",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "emissor",
+            "columnName": "emissor",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "indexador",
+            "columnName": "indexador",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "taxa",
+            "columnName": "taxa",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "vencimento",
+            "columnName": "vencimento",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "saldo",
+            "columnName": "saldo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saldoOrigem",
+            "columnName": "saldoOrigem",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "quantidade",
+            "columnName": "quantidade",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "quantidadeOrigem",
+            "columnName": "quantidadeOrigem",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "rentabilidadeMes",
+            "columnName": "rentabilidadeMes",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "rentabilidadeMesOrigem",
+            "columnName": "rentabilidadeMesOrigem",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "rentabilidadeAno",
+            "columnName": "rentabilidadeAno",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "rentabilidadeAnoOrigem",
+            "columnName": "rentabilidadeAnoOrigem",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "rentabilidade24Meses",
+            "columnName": "rentabilidade24Meses",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "rentabilidade24MesesOrigem",
+            "columnName": "rentabilidade24MesesOrigem",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "percentualCdiMes",
+            "columnName": "percentualCdiMes",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "percentualCdiMesOrigem",
+            "columnName": "percentualCdiMesOrigem",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "percentualCdiAno",
+            "columnName": "percentualCdiAno",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "percentualCdiAnoOrigem",
+            "columnName": "percentualCdiAnoOrigem",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "percentualCdi24Meses",
+            "columnName": "percentualCdi24Meses",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "percentualCdi24MesesOrigem",
+            "columnName": "percentualCdi24MesesOrigem",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "snapshotId",
+            "ordem"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_posicao_chave",
+            "unique": false,
+            "columnNames": [
+              "chave"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_posicao_chave` ON `${TABLE_NAME}` (`chave`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "snapshot",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "snapshotId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "base",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`unica` INTEGER NOT NULL, `snapshotId` TEXT NOT NULL, PRIMARY KEY(`unica`))",
+        "fields": [
+          {
+            "fieldPath": "unica",
+            "columnName": "unica",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "snapshotId",
+            "columnName": "snapshotId",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "unica"
+          ]
+        }
+      },
+      {
+        "tableName": "complemento",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `snapshotId` TEXT NOT NULL, `dataPlanilha` TEXT, `recebidoEm` INTEGER NOT NULL, `conteudo` TEXT NOT NULL, FOREIGN KEY(`snapshotId`) REFERENCES `snapshot`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "snapshotId",
+            "columnName": "snapshotId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataPlanilha",
+            "columnName": "dataPlanilha",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "recebidoEm",
+            "columnName": "recebidoEm",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "conteudo",
+            "columnName": "conteudo",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_complemento_snapshotId",
+            "unique": false,
+            "columnNames": [
+              "snapshotId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_complemento_snapshotId` ON `${TABLE_NAME}` (`snapshotId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "snapshot",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "snapshotId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "mercado",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`unica` INTEGER NOT NULL, `obtidoEm` INTEGER NOT NULL, `conteudo` TEXT NOT NULL, PRIMARY KEY(`unica`))",
+        "fields": [
+          {
+            "fieldPath": "unica",
+            "columnName": "unica",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "obtidoEm",
+            "columnName": "obtidoEm",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "conteudo",
+            "columnName": "conteudo",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "unica"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0cc4cedb0dbc4c73b4e22e740612e679')"
+    ]
+  }
+}

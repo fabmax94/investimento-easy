@@ -18,10 +18,13 @@ fun NavGraphBuilder.analise() {
         LaunchedEffect(Unit) { viewModel.carregar() }
         AnaliseScreen(
             estado = estado,
-            aoSelecionarAba = viewModel::selecionarAba,
-            aoGerar = viewModel::gerarAnalise,
-            aoSalvarChave = viewModel::salvarChave,
-            aoApagarChave = viewModel::apagarChave,
+            acoes =
+                AcoesAnalise(
+                    aoSelecionarAba = viewModel::selecionarAba,
+                    aoAtualizarMercado = viewModel::atualizarMercado,
+                    aoEscolherPerfil = viewModel::escolherPerfil,
+                    aoTrocarPerfil = viewModel::trocarPerfil,
+                ),
         )
     }
 }

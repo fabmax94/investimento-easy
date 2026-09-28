@@ -15,7 +15,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.investimentoeasy.core.designsystem.Castanha
 import com.investimentoeasy.core.designsystem.Formatacao
-import com.investimentoeasy.core.designsystem.componentes.BotaoPrimario
 import com.investimentoeasy.core.designsystem.componentes.BotaoTexto
 import com.investimentoeasy.core.designsystem.componentes.CartaoAviso
 import com.investimentoeasy.core.designsystem.componentes.CartaoContorno
@@ -39,54 +38,33 @@ import com.investimentoeasy.core.ui.ativos
 fun AbaOQueFazer(
     estado: EstadoAnalise,
     d: AnaliseDeterministica,
-    aoGerar: () -> Unit,
-    aoConfigurarChave: () -> Unit,
+    acoes: AcoesAnalise,
 ) {
-    val ia = estado.ia
     ContagemAlertas(d)
-    if (ia == null) {
-        CartaoSuave {
-            Text("VEREDICTO E PLANO", style = Castanha.tipografia.rotuloForte, color = Castanha.cores.textMedium)
-            Text(
-                "O Claude lê os números que o app calculou e escreve o veredicto, o plano de 30 dias e as realocações. " +
-                    "Cada número que ele citar é conferido com a sua carteira antes de aparecer aqui.",
-                style = Castanha.tipografia.corpo,
-                color = Castanha.cores.textIntense,
-            )
-            Text(
-                "Custa uma chamada à API, paga pela sua chave. A carteira vai sem número de conta e sem nome do assessor.",
-                style = Castanha.tipografia.legenda,
-                color = Castanha.cores.textMedium,
-            )
-        }
-        estado.erro?.let { CartaoAviso(Tom.NEGATIVO, "● NÃO FOI POSSÍVEL GERAR", it) }
-        if (estado.temChave) {
-            BotaoPrimario(
-                if (estado.gerando) "Gerando análise…" else "Gerar análise com o Claude",
-                onClick = aoGerar,
-                habilitado = !estado.gerando,
-            )
-        } else {
-            BotaoPrimario("Configurar chave da API", onClick = aoConfigurarChave)
-        }
+    val r = estado.recomendacao
+    if (r == null || estado.escolhendoPerfil) {
+        EscolhaDePerfil(estado.perfil, acoes.aoEscolherPerfil)
         Secao("Principais alertas") {
             d.alertas.take(PRINCIPAIS).forEach { CartaoAviso(it.severidade.estilo.tom, it.severidade.estilo.rotulo, textoAlerta(it)) }
             if (d.alertas.isEmpty()) CartaoAviso(Tom.POSITIVO, "✓ NENHUM ALERTA", "As regras de alerta não dispararam para esta carteira.")
         }
         return
     }
-
     CartaoSuave {
         Text("VEREDICTO", style = Castanha.tipografia.rotuloForte, color = Castanha.cores.textMedium)
-        Text(ia.saida.veredicto, style = Castanha.tipografia.destaqueTexto, color = Castanha.cores.textIntense)
-        Text(
-            "Interpretação do Claude · ${Formatacao.data(ia.geradaEm.atZone(java.time.ZoneId.systemDefault()).toLocalDate())}",
-            style = Castanha.tipografia.legenda,
-            color = Castanha.cores.textMedium,
-        )
+        Text(r.veredicto, style = Castanha.tipografia.destaqueTexto, color = Castanha.cores.textIntense)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                "Gerado no aparelho · ${r.perfil.rotuloCurto}",
+                style = Castanha.tipografia.legenda,
+                color = Castanha.cores.textMedium,
+                modifier = Modifier.weight(1f),
+            )
+            BotaoTexto("Trocar perfil", onClick = acoes.aoTrocarPerfil)
+        }
     }
     Secao("Próximos 30 dias") {
-        ia.saida.oQueFazer.acoes30Dias.forEachIndexed { i, acao ->
+        r.acoes30Dias.forEachIndexed { i, acao ->
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("${i + 1}.", style = Castanha.tipografia.corpoForte, color = Castanha.cores.textIntense)
                 Column {
@@ -96,33 +74,29 @@ fun AbaOQueFazer(
             }
         }
     }
-    if (ia.saida.oQueFazer.realocacoes.isNotEmpty()) {
+    if (r.realocacoes.isNotEmpty()) {
         Secao("Realocações") {
-            ia.saida.oQueFazer.realocacoes.forEach { r ->
+            r.realocacoes.forEach { re ->
                 CartaoContorno {
-                    LinhaValor("${r.vender} → ${r.destino}", valorSugerido(r.valor))
-                    Text(r.motivo, style = Castanha.tipografia.legenda, color = Castanha.cores.textMedium)
+                    LinhaValor("${re.vender} → ${re.destino}", Formatacao.reais(re.valor, centavos = false))
+                    Text(re.motivo, style = Castanha.tipografia.legenda, color = Castanha.cores.textMedium)
                 }
             }
         }
     }
-    if (ia.saida.oQueFazer.novosAtivos.isNotEmpty()) {
+    if (r.novosAtivos.isNotEmpty()) {
         Secao("Novos ativos para lacunas") {
-            ia.saida.oQueFazer.novosAtivos.forEach { n ->
+            r.novosAtivos.forEach { n ->
                 CartaoContorno {
-                    LinhaValor(n.sugestao, valorSugerido(n.valor))
+                    LinhaValor(n.sugestao, Formatacao.reais(n.valor, centavos = false))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Etiqueta(n.prioridade.estilo.rotulo, n.prioridade.estilo.tom)
-                        Etiqueta(n.lacuna.rotulo, Tom.NEUTRO)
+                        Etiqueta(n.motivo.rotulo, Tom.NEUTRO)
                     }
                     Text(n.justificativa, style = Castanha.tipografia.legenda, color = Castanha.cores.textMedium)
                 }
             }
         }
-    }
-    estado.erro?.let { CartaoAviso(Tom.NEGATIVO, "● NÃO FOI POSSÍVEL GERAR", it) }
-    if (estado.temChave) {
-        BotaoTexto(if (estado.gerando) "Gerando…" else "Gerar a análise de novo", onClick = aoGerar, alinhadoAoTexto = true)
     }
 }
 
@@ -153,12 +127,14 @@ fun AbaMercado(
     estado: EstadoAnalise,
     d: AnaliseDeterministica,
 ) {
+    estado.panorama?.let { IndicadoresDeMercado(it) }
+    estado.recomendacao?.mercado?.takeIf { it.isNotEmpty() }?.let { NotasDoApp("O mercado e a sua carteira", it) }
     if (d.mercado.isEmpty()) {
         CartaoAviso(
             Tom.INFORMATIVO,
             "ⓘ SEM ÍNDICES NESTA BASE",
             "Esta carteira foi enviada antes de o app guardar os índices do relatório. " +
-                "Envie o relatório de novo para ver CDI, Ibovespa, IPCA e Dólar.",
+                "Envie o relatório de novo para ver CDI, Ibovespa, IPCA e Dólar do período.",
         )
     } else {
         Secao("Índices do relatório") {
@@ -186,12 +162,6 @@ fun AbaMercado(
             ChipOrigem(Origem.RELATORIO)
         }
     }
-    CartaoAviso(
-        Tom.INFORMATIVO,
-        "ⓘ DADOS DE MERCADO",
-        "Selic atual e expectativas de mercado ainda não entram no app: a análise usa só os índices do relatório.",
-    )
-    estado.ia?.let { NotasDoClaude(listOf(it.saida.mercado.analise)) }
 }
 
 @Composable
@@ -206,8 +176,15 @@ private fun androidx.compose.foundation.layout.RowScope.CabecalhoIndice(
 fun AbaAlocacao(
     estado: EstadoAnalise,
     d: AnaliseDeterministica,
+    aoTrocarPerfil: () -> Unit,
 ) {
     Secao("Por classe") { ListaAlocacao(d.alocacao) }
+    estado.recomendacao?.let { r ->
+        Secao("Contra o ${r.perfil.rotuloCurto.lowercase()}") {
+            r.alocacao.forEach { CartaoAviso(it.status.estilo.tom, it.status.estilo.rotulo, it.texto) }
+            BotaoTexto("Trocar perfil", onClick = aoTrocarPerfil, alinhadoAoTexto = true)
+        }
+    }
     Secao("Concentração por gestora") {
         if (d.gestoras.isEmpty()) Text("Sem fundos na carteira.", style = Castanha.tipografia.corpo, color = Castanha.cores.textMedium)
         d.gestoras.forEach { ListaConcentracao(it, "fundo") }
@@ -230,11 +207,6 @@ fun AbaAlocacao(
                 style = Castanha.tipografia.legenda,
                 color = Castanha.cores.textMedium,
             )
-        }
-    }
-    estado.ia?.saida?.alocacao?.diagnostico?.takeIf { it.isNotEmpty() }?.let { diagnosticos ->
-        Secao("Diagnóstico do Claude") {
-            diagnosticos.forEach { CartaoAviso(it.status.estilo.tom, it.status.estilo.rotulo, it.texto) }
         }
     }
 }
@@ -278,7 +250,7 @@ fun AbaFundos(
         })
         NotaRitmoCenario()
     }
-    estado.ia?.let { NotasDoClaude(it.saida.fundos.notas) }
+    estado.recomendacao?.fundos?.let { NotasDoApp("Leitura do app", it) }
 }
 
 @Composable
@@ -323,9 +295,11 @@ fun AbaFiis(
         })
         NotaRitmoCenario()
         SemPlanilha(estado)
-        CartaoAviso(Tom.INFORMATIVO, "ⓘ DADOS DE MERCADO", "P/VP, dividend yield e vacância ainda não entram no app.")
+        if (estado.panorama == null) {
+            CartaoAviso(Tom.INFORMATIVO, "ⓘ DADOS DE MERCADO", "Atualize os dados de mercado para ver P/VP e dividend yield de cada FII.")
+        }
     }
-    estado.ia?.let { NotasDoClaude(it.saida.fiis.notas) }
+    estado.recomendacao?.fiis?.let { NotasDoApp("Leitura do app", it) }
 }
 
 @Composable
@@ -348,7 +322,7 @@ fun AbaAcoesEtfs(
             d.simbolicas.forEach { LinhaValor(it.ativo.nome, Formatacao.reais(it.saldo.valor)) }
         }
     }
-    estado.ia?.let { NotasDoClaude(it.saida.acoesEtfs.notas) }
+    estado.recomendacao?.acoesEtfs?.let { NotasDoApp("Leitura do app", it) }
 }
 
 @Composable
@@ -359,11 +333,11 @@ fun AbaAlertas(
     if (d.alertas.isEmpty()) {
         CartaoAviso(Tom.POSITIVO, "✓ NENHUM ALERTA", "As regras de alerta não dispararam para esta carteira.")
     }
-    val comentarios = estado.ia?.saida?.alertas?.comentarios.orEmpty().groupBy { it.regra }
+    val comentarios = estado.recomendacao?.comentariosAlertas.orEmpty()
     d.alertas.forEach { alerta ->
         CartaoAviso(alerta.severidade.estilo.tom, alerta.severidade.estilo.rotulo, textoAlerta(alerta)) {
-            comentarios[alerta.regra.name]?.firstOrNull()?.let {
-                Text(it.texto, style = Castanha.tipografia.legenda.copy(fontWeight = FontWeight.Normal), color = Castanha.cores.textMedium)
+            comentarios[alerta.regra]?.let {
+                Text(it, style = Castanha.tipografia.legenda.copy(fontWeight = FontWeight.Normal), color = Castanha.cores.textMedium)
             }
         }
     }

@@ -130,7 +130,7 @@ class MotorDeRecomendacaoTest {
         val r = recomendar()
         // Exterior 60% contra máximo de 20%: 40 pp de R$ 100 mil. IVVB11 (maior) cobre sozinho.
         r.realocacoes.map { it.vender to it.valor } shouldContainExactly listOf("IVVB11" to Money.of("40000.00"))
-        r.realocacoes.single().destino shouldBe "Tesouro IPCA+ ou IMAB11 (renda fixa ipca+)"
+        r.realocacoes.single().destino shouldBe "Tesouro IPCA+ ou IMAB11 (renda fixa IPCA+)"
         r.realocacoes.single().motivo shouldStartWith "Exterior em 60,0%, acima do máximo de 20% do perfil moderado"
     }
 
@@ -169,6 +169,14 @@ class MotorDeRecomendacaoTest {
         colchao.valor shouldBe Money.of("12000.00")
         r.acoes30Dias.first { it.titulo == "Montar o colchão de liquidez" }.detalhe shouldContain "R$ 12.000"
         r.realocacoes.single().destino shouldBe "Tesouro Selic (colchão de liquidez)"
+    }
+
+    @Test
+    fun `colchao ja conta como pos-fixado e nao duplica a sugestao de Tesouro Selic`() {
+        // Conservador: pós-fixado em 30% contra mínimo de 35% e alvo de 45% (faltam 15 mil); o colchão já leva 12 mil.
+        val r = recomendar(Perfil.CONSERVADOR, snapshot = base.copy(contexto = contexto))
+        r.novosAtivos.filter { it.grupo == GrupoAlocacao.RENDA_FIXA_POS }.map { it.motivo to it.valor } shouldContainExactly
+            listOf(MotivoSugestao.COLCHAO_DE_LIQUIDEZ to Money.of("12000.00"), MotivoSugestao.ABAIXO_DO_PERFIL to Money.of("3000.00"))
     }
 
     @Test

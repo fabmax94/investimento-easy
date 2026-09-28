@@ -77,7 +77,7 @@ private fun destino(
 ): String {
     if (ctx.faltaColchao()) return "Tesouro Selic (colchão de liquidez)"
     val grupo = desvios.filter { it.falta.pontos.signum() > 0 }.maxByOrNull { it.falta }?.grupo ?: GrupoAlocacao.RENDA_FIXA_POS
-    return "${sugestaoPara(ctx, grupo)} (${grupo.rotulo.lowercase()})"
+    return "${sugestaoPara(ctx, grupo)} (${grupo.rotuloNaFrase})"
 }
 
 private fun motivo(

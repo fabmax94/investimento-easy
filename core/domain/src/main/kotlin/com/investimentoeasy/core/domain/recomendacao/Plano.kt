@@ -49,7 +49,7 @@ internal fun plano30Dias(
         }
     val novo =
         novos.firstOrNull { it.motivo != MotivoSugestao.COLCHAO_DE_LIQUIDEZ }?.let {
-            Acao("Começar ${it.sugestao}", "Aporte de ${reais(it.valor)} em ${it.grupo.rotulo.lowercase()}.")
+            Acao("Começar ${it.sugestao}", "Aporte de ${reais(it.valor)} em ${it.grupo.rotuloNaFrase}.")
         }
     val conferir =
         alertas.filter { it.regra == RegraAlerta.DADO_A_CONFERIR }.map {

@@ -1,7 +1,5 @@
 package com.investimentoeasy.feature.analysis
 
-import com.investimentoeasy.core.ai.Prioridade
-import com.investimentoeasy.core.ai.StatusDiagnostico
 import com.investimentoeasy.core.designsystem.Formatacao
 import com.investimentoeasy.core.designsystem.componentes.Tom
 import com.investimentoeasy.core.domain.analise.AlertaAnalise
@@ -9,10 +7,13 @@ import com.investimentoeasy.core.domain.analise.Cenario
 import com.investimentoeasy.core.domain.analise.Ritmo
 import com.investimentoeasy.core.domain.analise.RitmoAtivo
 import com.investimentoeasy.core.domain.analise.Severidade
-import com.investimentoeasy.core.domain.analise.TipoLacuna
 import com.investimentoeasy.core.domain.complemento.BaseDoCusto
 import com.investimentoeasy.core.domain.complemento.ComplementoPlanilha
 import com.investimentoeasy.core.domain.complemento.resultadoDe
+import com.investimentoeasy.core.domain.mercado.Perfil
+import com.investimentoeasy.core.domain.recomendacao.MotivoSugestao
+import com.investimentoeasy.core.domain.recomendacao.Prioridade
+import com.investimentoeasy.core.domain.recomendacao.StatusDiagnostico
 import com.investimentoeasy.core.model.Posicao
 
 /** Badges sempre com ícone e rótulo, nunca só cor (skill, seção 9). */
@@ -86,17 +87,16 @@ val StatusDiagnostico.estilo: EstiloSeveridade
             StatusDiagnostico.CRITICO -> EstiloSeveridade(Tom.NEGATIVO, "● Crítico")
         }
 
-val TipoLacuna.rotulo: String
+val MotivoSugestao.rotulo: String
     get() =
         when (this) {
-            TipoLacuna.PROTECAO_INFLACAO -> "Proteção contra inflação"
-            TipoLacuna.SEM_PREFIXADO -> "Renda fixa prefixada"
-            TipoLacuna.SEM_LIQUIDEZ_COM_SAQUES -> "Colchão de liquidez"
+            MotivoSugestao.PROTECAO_INFLACAO -> "Proteção contra inflação"
+            MotivoSugestao.SEM_PREFIXADO -> "Renda fixa prefixada"
+            MotivoSugestao.COLCHAO_DE_LIQUIDEZ -> "Colchão de liquidez"
+            MotivoSugestao.ABAIXO_DO_PERFIL -> "Abaixo do perfil"
         }
 
-/** "20000.00" (valor decidido pelo modelo) → "R$ 20.000". */
-fun valorSugerido(valor: String): String =
-    valor.toBigDecimalOrNull()?.let { Formatacao.reais(com.investimentoeasy.core.model.Money.of(it), centavos = false) } ?: valor
+val Perfil.rotuloCurto: String get() = "Perfil ${rotulo.lowercase()}"
 
 /**
  * Linha de custo e resultado sob o nome do ativo, a partir da planilha: "PM R$ 95,00 · +R$ 1.100 (+5,79%)".

@@ -6,14 +6,14 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
-    entities = [SnapshotEntity::class, PosicaoEntity::class, BaseEntity::class, AnaliseEntity::class, ComplementoEntity::class],
-    version = 4,
+    entities = [SnapshotEntity::class, PosicaoEntity::class, BaseEntity::class, ComplementoEntity::class, MercadoEntity::class],
+    version = 5,
     exportSchema = true,
 )
 internal abstract class InvestimentoDatabase : RoomDatabase() {
     abstract fun snapshotDao(): SnapshotDao
 
-    abstract fun analiseDao(): AnaliseDao
+    abstract fun mercadoDao(): MercadoDao
 
     abstract fun complementoDao(): ComplementoDao
 
@@ -78,6 +78,19 @@ internal abstract class InvestimentoDatabase : RoomDatabase() {
                 }
             }
 
-        val MIGRACOES: Array<Migration> = arrayOf(MIGRACAO_1_2, MIGRACAO_2_3, MIGRACAO_3_4)
+        /** v5: a análise passa a ser gerada no aparelho (sai a tabela do Claude) e o mercado baixado fica em cache. */
+        val MIGRACAO_4_5: Migration =
+            object : Migration(4, 5) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL("DROP INDEX IF EXISTS `index_analise_snapshotId`")
+                    db.execSQL("DROP TABLE IF EXISTS `analise`")
+                    db.execSQL(
+                        "CREATE TABLE IF NOT EXISTS `mercado` (`unica` INTEGER NOT NULL, `obtidoEm` INTEGER NOT NULL, " +
+                            "`conteudo` TEXT NOT NULL, PRIMARY KEY(`unica`))",
+                    )
+                }
+            }
+
+        val MIGRACOES: Array<Migration> = arrayOf(MIGRACAO_1_2, MIGRACAO_2_3, MIGRACAO_3_4, MIGRACAO_4_5)
     }
 }

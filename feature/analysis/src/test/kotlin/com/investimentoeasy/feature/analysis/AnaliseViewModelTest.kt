@@ -1,15 +1,11 @@
 package com.investimentoeasy.feature.analysis
 
-import com.investimentoeasy.core.ai.FabricaDeModelo
-import com.investimentoeasy.core.ai.RespostaDoModelo
-import com.investimentoeasy.core.ai.paraJson
-import com.investimentoeasy.core.domain.analise.AnaliseGuardada
-import com.investimentoeasy.core.seguranca.CofreDeChave
-import com.investimentoeasy.core.seguranca.CofreIndisponivelException
-import com.investimentoeasy.core.testing.FakeRepositorioDeAnalises
+import com.investimentoeasy.core.domain.mercado.Perfil
+import com.investimentoeasy.core.domain.mercado.ProvedorDeMercado
 import com.investimentoeasy.core.testing.FakeRepositorioDeComplementos
+import com.investimentoeasy.core.testing.FakeRepositorioDeMercado
+import com.investimentoeasy.core.testing.FakeRepositorioDePerfil
 import com.investimentoeasy.core.testing.FakeSnapshotRepository
-import com.investimentoeasy.core.testing.INSTANTE_FIXO
 import com.investimentoeasy.core.testing.relogioFixo
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
@@ -25,37 +21,20 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import java.time.Duration
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AnaliseViewModelTest {
     private val dispatcher = UnconfinedTestDispatcher()
-    private val analises = FakeRepositorioDeAnalises()
-    private val cofre =
-        object : CofreDeChave {
-            var chave: String? = null
-            var falhar = false
-
-            override fun ler() = chave
-
-            override fun gravar(chave: String) {
-                if (falhar) throw CofreIndisponivelException(java.security.ProviderException("Keystore"))
-                this.chave = chave
-            }
-
-            override fun apagar() {
-                chave = null
-            }
-        }
-    private val chavesUsadas = mutableListOf<String>()
-    private val pedidos = mutableListOf<com.investimentoeasy.core.ai.PedidoAoModelo>()
     private val complementos = FakeRepositorioDeComplementos()
-    private var explodir = false
-    private var incompativel = false
-    private var resposta: RespostaDoModelo =
-        RespostaDoModelo.Texto(
-            Cenarios.saida.paraJson(),
-            "claude-opus-5",
-        )
+    private val mercado = FakeRepositorioDeMercado()
+    private val perfil = FakeRepositorioDePerfil()
+    private val pedidos = mutableListOf<Set<String>>()
+    private val provedor =
+        ProvedorDeMercado { tickers ->
+            pedidos += tickers
+            Cenarios.panorama
+        }
 
     @Before
     fun setUp() = Dispatchers.setMain(dispatcher)
@@ -63,155 +42,86 @@ class AnaliseViewModelTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel(comBase: Boolean = true): AnaliseViewModel {
-        val repo =
-            if (comBase) FakeSnapshotRepository(listOf(Cenarios.snapshot), Cenarios.snapshot.id) else FakeSnapshotRepository()
-        val fabrica =
-            FabricaDeModelo { chave ->
-                chavesUsadas += chave
-                com.investimentoeasy.core.ai.ModeloDeLinguagem { pedido ->
-                    pedidos += pedido
-                    check(!explodir) { "erro do SDK no Android" }
-                    if (incompativel) throw NoClassDefFoundError("java/beans/Introspector")
-                    resposta
-                }
-            }
-        return AnaliseViewModel(
-            FontesDaAnalise(repo, analises, complementos),
-            cofre,
-            fabrica,
-            relogioFixo(),
-            dispatcher,
-        ).apply { carregar() }
+    private fun viewModel(
+        comBase: Boolean = true,
+        agora: java.time.Instant = Cenarios.instante,
+    ): AnaliseViewModel {
+        val repo = if (comBase) FakeSnapshotRepository(listOf(Cenarios.snapshot), Cenarios.snapshot.id) else FakeSnapshotRepository()
+        return AnaliseViewModel(FontesDaAnalise(repo, complementos, mercado, perfil), provedor, relogioFixo(agora), dispatcher)
+            .apply { carregar() }
     }
 
     @Test
-    fun `sem carteira mostra estado vazio`() {
+    fun `sem carteira mostra estado vazio e nao busca mercado`() {
         val estado = viewModel(comBase = false).estado.value
         estado.carregando shouldBe false
         estado.semCarteira shouldBe true
+        pedidos shouldHaveSize 0
     }
 
     @Test
-    fun `camadas 1 e 2 rodam sem chave e sem custo`() {
+    fun `sem perfil calcula as camadas 1 e 2 mas nao recomenda`() {
         val estado = viewModel().estado.value
-        estado.deterministica.shouldNotBeNull().alertas shouldHaveSize 8
-        estado.ia.shouldBeNull()
-        estado.temChave shouldBe false
+        estado.deterministica.shouldNotBeNull()
+        estado.recomendacao.shouldBeNull()
+        estado.perfil.shouldBeNull()
     }
 
     @Test
-    fun `sem chave, gerar pede a configuracao e nao chama o modelo`() {
-        val vm = viewModel()
-        vm.gerarAnalise()
-        vm.estado.value.erro!! shouldContain "Configure a chave"
-        chavesUsadas shouldHaveSize 0
-    }
-
-    @Test
-    fun `com chave, gera, valida, guarda e mostra a analise`() {
-        val vm = viewModel()
-        vm.salvarChave("sk-ant-123")
-        vm.estado.value.temChave shouldBe true
-        vm.gerarAnalise()
-        chavesUsadas shouldBe listOf("sk-ant-123")
-        vm.estado.value.ia!!.saida shouldBe Cenarios.saida
-        vm.estado.value.gerando shouldBe false
-        analises.salvas.single().let {
-            it.snapshotId shouldBe Cenarios.snapshot.id
-            it.geradaEm shouldBe INSTANTE_FIXO
-            it.versaoPrompt shouldBe "analise-v2"
-        }
-    }
-
-    @Test
-    fun `analise guardada volta sem nova chamada`() {
-        kotlinx.coroutines.runBlocking {
-            analises.salvar(AnaliseGuardada(Cenarios.snapshot.id, INSTANTE_FIXO, "claude-opus-5", "analise-v1", Cenarios.saida.paraJson()))
-        }
-        viewModel().estado.value.ia!!.saida shouldBe Cenarios.saida
-        chavesUsadas shouldHaveSize 0
-    }
-
-    @Test
-    fun `numero inventado nas duas tentativas nao vira analise nem e salvo`() {
-        resposta =
-            RespostaDoModelo.Texto(Cenarios.saida.copy(veredicto = "Rendeu 99,9%.").paraJson(), "m")
-        val vm = viewModel()
-        vm.salvarChave("sk")
-        vm.gerarAnalise()
-        vm.estado.value.ia.shouldBeNull()
-        vm.estado.value.erro!! shouldContain "foi descartada"
-        analises.salvas shouldHaveSize 0
-    }
-
-    @Test
-    fun `falhas da API viram mensagens`() {
-        mapOf(
-            RespostaDoModelo.ChaveInvalida to "chave da API foi recusada",
-            RespostaDoModelo.SemConexao to "Sem conexão",
-            RespostaDoModelo.LimiteDeUso to "Limite de uso",
-        ).forEach { (falha, texto) ->
-            resposta = falha
+    fun `sem cache busca o mercado ao abrir, so com tickers, e guarda`() =
+        runTest {
             val vm = viewModel()
-            vm.salvarChave("sk")
-            vm.gerarAnalise()
-            vm.estado.value.erro!! shouldContain texto
+            pedidos.single() shouldBe tickers(Cenarios.snapshot)
+            pedidos.single().none { it.startsWith("RECR12") } shouldBe true
+            mercado.ultimo() shouldBe Cenarios.panorama
+            vm.estado.value.panorama shouldBe Cenarios.panorama
+            vm.estado.value.atualizandoMercado shouldBe false
         }
+
+    @Test
+    fun `cache recente nao busca de novo e cache velho busca`() =
+        runTest {
+            mercado.salvar(Cenarios.panorama)
+            viewModel(agora = Cenarios.instante.plus(Duration.ofHours(1)))
+            pedidos shouldHaveSize 0
+            viewModel(agora = Cenarios.instante.plus(Duration.ofHours(7)))
+            pedidos shouldHaveSize 1
+        }
+
+    @Test
+    fun `escolher perfil gera a recomendacao e fica guardado`() {
+        val vm = viewModel()
+        vm.escolherPerfil(Perfil.ARROJADO)
+        perfil.ler() shouldBe Perfil.ARROJADO
+        with(vm.estado.value) {
+            recomendacao!!.perfil shouldBe Perfil.ARROJADO
+            recomendacao!!.veredicto shouldContain "Focus"
+            escolhendoPerfil shouldBe false
+        }
+        vm.trocarPerfil()
+        vm.estado.value.escolhendoPerfil shouldBe true
     }
 
     @Test
-    fun `abas e chave`() {
+    fun `mercado atualiza o cenario pelo ciclo real`() {
+        perfil.gravar(Perfil.MODERADO)
+        val vm = viewModel()
+        val ipca = vm.estado.value.deterministica!!.ativos.first { it.posicao.ativo.nome == "IMAB11" }
+        ipca.cenario.driver shouldBe "ganha marcação com juro ↓"
+        vm.estado.value.recomendacao!!.mercado.first() shouldContain "Selic de 13,75%"
+    }
+
+    @Test
+    fun `planilha guardada entra no estado`() =
+        runTest {
+            complementos.salvar(Cenarios.complemento)
+            viewModel().estado.value.complemento shouldBe Cenarios.complemento
+        }
+
+    @Test
+    fun `selecionar aba`() {
         val vm = viewModel()
         vm.selecionarAba(AbaAnalise.FIIS)
         vm.estado.value.aba shouldBe AbaAnalise.FIIS
-        vm.salvarChave("  ")
-        vm.estado.value.temChave shouldBe false
-        vm.salvarChave("sk")
-        vm.apagarChave()
-        vm.estado.value.temChave shouldBe false
-        cofre.chave.shouldBeNull()
-    }
-
-    @Test
-    fun `planilha guardada entra no estado e na entrada do Claude`() =
-        runTest {
-            complementos.salvar(Cenarios.complemento)
-            cofre.gravar("sk-ant-teste")
-            val vm = viewModel()
-            vm.estado.value.complemento shouldBe Cenarios.complemento
-            vm.gerarAnalise()
-            pedidos.single().mensagem shouldContain "\"dataPlanilha\":\"2026-06-21\""
-            pedidos.single().mensagem shouldContain "\"precoMedio\":\"151.23\""
-        }
-
-    @Test
-    fun `falha do armazenamento seguro ao salvar a chave vira mensagem, sem derrubar o app`() {
-        cofre.falhar = true
-        val vm = viewModel()
-        vm.salvarChave("sk-ant-teste")
-        vm.estado.value.temChave shouldBe false
-        vm.estado.value.erro shouldBe ERRO_COFRE
-        cofre.chave.shouldBeNull()
-    }
-
-    @Test
-    fun `erro inesperado ao gerar vira mensagem, sem derrubar o app`() {
-        cofre.gravar("sk-ant-teste")
-        explodir = true
-        val vm = viewModel()
-        vm.gerarAnalise()
-        vm.estado.value.gerando shouldBe false
-        vm.estado.value.erro!! shouldContain "falha inesperada (IllegalStateException)"
-        analises.salvas shouldHaveSize 0
-    }
-
-    @Test
-    fun `SDK incompativel com o Android vira mensagem, sem derrubar o app`() {
-        cofre.gravar("sk-ant-teste")
-        incompativel = true
-        val vm = viewModel()
-        vm.gerarAnalise()
-        vm.estado.value.erro!! shouldContain "falha inesperada (NoClassDefFoundError)"
     }
 }

@@ -71,20 +71,17 @@ internal data class BaseEntity(
     }
 }
 
-/** Análise da Camada 3 (JSON validado), várias por snapshot; a tela mostra a mais recente. */
-@Entity(
-    tableName = "analise",
-    foreignKeys = [ForeignKey(entity = SnapshotEntity::class, parentColumns = ["id"], childColumns = ["snapshotId"])],
-    indices = [Index("snapshotId")],
-)
-internal data class AnaliseEntity(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val snapshotId: String,
-    val geradaEm: Long,
-    val modelo: String,
-    val versaoPrompt: String,
+/** Último panorama de mercado baixado (uma linha só), para a análise funcionar sem internet. */
+@Entity(tableName = "mercado")
+internal data class MercadoEntity(
+    @PrimaryKey val unica: Int = UNICA,
+    val obtidoEm: Long,
     val conteudo: String,
-)
+) {
+    companion object {
+        const val UNICA = 1
+    }
+}
 
 /** Dados da planilha "Posição Detalhada" guardados ao lado de um snapshot (R16: o snapshot não muda). */
 @Entity(
